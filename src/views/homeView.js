@@ -10,6 +10,50 @@ const CATEGORIES = [
   { id: 'fragrance-free', title: 'Fragrance-free', image: 'fragrance' },
 ];
 
+export function getAdjacentCollection(activeFilter, step) {
+  const index = CATEGORIES.findIndex(({ id }) => id === activeFilter);
+  return CATEGORIES[(index + step + CATEGORIES.length) % CATEGORIES.length];
+}
+
+function renderCollectionExplorer(activeFilter) {
+  return `
+    <div class="collection-explorer" data-collection-explorer>
+      <div class="collection-stage">
+        <div class="collection-stage__images" aria-hidden="true">
+          ${CATEGORIES.map(({ id, image }) => `
+            <img src="assets/photos/collection-${image}.webp" alt="" width="900" height="675"
+              loading="lazy" decoding="async" data-collection-slide="${id}" class="${id === activeFilter ? 'is-active' : ''}" />
+          `).join('')}
+        </div>
+        <div class="collection-stage__ticker">
+          <button type="button" class="collection-step" data-action="step-category" data-step="-1"
+            aria-label="Previous category" aria-controls="catalog-grid-slot">
+            ${iconSvg('icon-arrow-left')}
+            <span class="collection-step__label" aria-hidden="true">${getAdjacentCollection(activeFilter, -1).title}</span>
+          </button>
+          <div class="collection-stage__titles" aria-hidden="true">
+            ${CATEGORIES.map(({ id, title }) => `
+              <span data-collection-slide="${id}" class="${id === activeFilter ? 'is-active' : ''}">${title}</span>
+            `).join('')}
+          </div>
+          <button type="button" class="collection-step" data-action="step-category" data-step="1"
+            aria-label="Next category" aria-controls="catalog-grid-slot">
+            <span class="collection-step__label" aria-hidden="true">${getAdjacentCollection(activeFilter, 1).title}</span>
+            ${iconSvg('icon-arrow-right')}
+          </button>
+        </div>
+      </div>
+
+      <div class="collection-filters" role="group" aria-label="Filter skincare">
+        ${CATEGORIES.map(({ id, title }) => `
+          <button type="button" class="collection-filter" data-action="set-category" data-category="${id}"
+            aria-pressed="${String(activeFilter === id)}" aria-controls="catalog-grid-slot">${title}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 const QUESTIONS = [
   ['Where should I start?', 'Start with the Daily Cleansing Foam. Add moisturizer afterward if you want a simple two-step routine.'],
   ['Which products are fragrance-free?', 'The Hydrating Toner and Daily Face Moisturizer are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
@@ -102,15 +146,7 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
           </select>
         </div>
       </div>
-      <div class="collection-filters" role="group" aria-label="Filter skincare">
-        ${CATEGORIES.map(({ id, title, image }) => `
-          <button type="button" class="collection-filter" data-action="set-category" data-category="${id}"
-            aria-pressed="${String(activeFilter === id)}" aria-controls="catalog-grid-slot">
-            <img src="assets/photos/collection-${image}.webp" alt="" width="900" height="675" loading="lazy" />
-            <span>${title}</span>
-          </button>
-        `).join('')}
-      </div>
+      ${renderCollectionExplorer(activeFilter)}
       <div id="catalog-grid-slot">${renderHomeCatalogGrid(activeFilter, sortBy)}</div>
     </section>
 

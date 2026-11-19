@@ -8,7 +8,11 @@ import {
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer } from './components/cartDrawer.js';
 import { renderSearchModal, renderSearchResults } from './components/searchModal.js';
-import { renderHomeCatalogGrid, renderHomeView } from './views/homeView.js';
+import {
+  getAdjacentCollection,
+  renderHomeCatalogGrid,
+  renderHomeView,
+} from './views/homeView.js';
 import { getPdpMediaOptions, renderPdpMedia, renderProductView } from './views/productView.js';
 import { renderRoutineView } from './views/routineView.js';
 import { renderBrandView } from './views/brandView.js';
@@ -193,11 +197,12 @@ function renderRoute() {
   });
 
   mainEl.innerHTML = renderActiveViewHtml();
+  const explorer = mainEl.querySelector('[data-collection-explorer]');
+  if (explorer) bindCollectionControls(explorer);
 
   footerRoot.innerHTML = renderFooter();
 
   renderOverlays(false);
-
 }
 
 function closeAllOverlays({ restoreFocus = true } = {}) {
@@ -233,12 +238,64 @@ function focusElementSoon(selector) {
 function updateCatalogInPlace() {
   const slot = document.getElementById('catalog-grid-slot');
   if (!slot) return;
-  for (const button of document.querySelectorAll('.collection-filter')) {
-    button.setAttribute('aria-pressed', String(button.dataset.category === state.activeFilter));
-  }
   slot.innerHTML = renderHomeCatalogGrid(state.activeFilter, state.sortBy);
   const count = Number(slot.querySelector('[data-filter-count]').dataset.filterCount);
-  announce(`${count} ${count === 1 ? 'product' : 'products'} shown.`);
+  return count;
+}
+
+function selectCollection(id, direction = 1) {
+  if (id === state.activeFilter) return;
+  const explorer = document.querySelector('[data-collection-explorer]');
+  const previous = state.activeFilter;
+  state.activeFilter = id;
+  explorer.dataset.direction = direction < 0 ? 'back' : 'forward';
+
+  for (const slide of explorer.querySelectorAll('[data-collection-slide]')) {
+    slide.classList.toggle('is-departing', slide.dataset.collectionSlide === previous);
+    slide.classList.toggle('is-active', slide.dataset.collectionSlide === id);
+  }
+  for (const button of explorer.querySelectorAll('.collection-filter')) {
+    button.setAttribute('aria-pressed', String(button.dataset.category === id));
+  }
+  for (const button of explorer.querySelectorAll('.collection-step')) {
+    button.querySelector('.collection-step__label').textContent =
+      getAdjacentCollection(id, Number(button.dataset.step)).title;
+  }
+
+  const count = updateCatalogInPlace();
+  document.querySelector('#catalog-grid-slot > .shop-grid').classList.add('is-filtered');
+  const title = explorer.querySelector('.collection-filter[aria-pressed="true"]').textContent;
+  announce(`${title}. ${count} ${count === 1 ? 'product' : 'products'} shown.`);
+}
+
+function stepCollection(step) {
+  selectCollection(getAdjacentCollection(state.activeFilter, step).id, step);
+}
+
+function bindCollectionControls(explorer) {
+  explorer.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
+    event.preventDefault();
+    stepCollection(event.key === 'ArrowLeft' ? -1 : 1);
+    if (event.target.matches('.collection-filter')) {
+      explorer.querySelector('.collection-filter[aria-pressed="true"]').focus();
+    }
+  });
+
+  const stage = explorer.querySelector('.collection-stage');
+  let touchStart;
+  stage.addEventListener('pointerdown', (event) => {
+    if (event.pointerType !== 'touch' || !event.isPrimary || event.target.closest('button')) return;
+    touchStart = { x: event.clientX, y: event.clientY };
+  });
+  stage.addEventListener('pointerup', (event) => {
+    if (!touchStart || !event.isPrimary || event.pointerType !== 'touch') return;
+    const x = event.clientX - touchStart.x;
+    const y = event.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(x) >= 40 && Math.abs(x) > Math.abs(y) * 1.4) stepCollection(x < 0 ? 1 : -1);
+  });
+  stage.addEventListener('pointercancel', () => { touchStart = null; });
 }
 
 async function startCheckout() {
@@ -349,8 +406,13 @@ document.addEventListener('click', (event) => {
       break;
     }
     case 'set-category': {
-      state.activeFilter = actionEl.dataset.category || 'all';
-      updateCatalogInPlace();
+      const buttons = [...actionEl.parentElement.children];
+      const current = buttons.findIndex((button) => button.dataset.category === state.activeFilter);
+      selectCollection(actionEl.dataset.category, buttons.indexOf(actionEl) - current);
+      break;
+    }
+    case 'step-category': {
+      stepCollection(Number(actionEl.dataset.step));
       break;
     }
     case 'set-pdp-media': {
@@ -454,7 +516,8 @@ document.addEventListener('change', (event) => {
   const target = event.target;
   if (target instanceof HTMLSelectElement && target.dataset.action === 'set-sort') {
     state.sortBy = target.value || 'featured';
-    updateCatalogInPlace();
+    const count = updateCatalogInPlace();
+    announce(`${count} ${count === 1 ? 'product' : 'products'} shown.`);
   }
 });
 
