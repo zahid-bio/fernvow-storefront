@@ -1,6 +1,6 @@
 # Fernvow product media
 
-All four product meshes came from [Microsoft TRELLIS.2](https://github.com/microsoft/TRELLIS.2) using [trellis.cpp v0.8.1](https://github.com/pwilkin/trellis.cpp/releases/tag/v0.8.1) and the [Q4 GGUF weights](https://huggingface.co/ilintar/trellis2-gguf/tree/main/q4). Blender applied Fernvow’s label artwork and separate paper, bottle, and cap roughness maps. The product pages show Cycles ray-traced studio stills alongside the interactive WebGL viewer, which loads on request.
+All four product meshes came from [Microsoft TRELLIS.2](https://github.com/microsoft/TRELLIS.2) using [trellis.cpp v0.8.1](https://github.com/pwilkin/trellis.cpp/releases/tag/v0.8.1) and the [Q4 GGUF weights](https://huggingface.co/ilintar/trellis2-gguf/tree/main/q4). Blender applied Fernvow’s label artwork and separate paper, bottle, and cap roughness maps. The model files and Cycles ray-traced stills are archived production assets. Product pages use the photographs below.
 
 ## Campaign photography
 
@@ -50,7 +50,7 @@ scripts/generate_models.sh /tmp/fernvow-reconstructions
 blender --background --factory-startup --threads 6 --python scripts/render_products.py -- /tmp/fernvow-reconstructions /tmp/fernvow-renders
 ```
 
-The Blender script creates label textures in memory using `assets/models/textures`. It exports a GLB with packed label, roughness, and normal maps and a 1400 × 1050 ray-traced studio still. Export the still as a 1120 × 840 WebP at quality 89 under `assets/photos/studio-<slug>.webp`. The renderer and browser viewer use the [Studio Small 09 HDRI](https://polyhaven.com/a/studio_small_09) by Sergej Majboroda, published by Poly Haven under CC0. The model in the browser is rendered in WebGL with the same environment map. Pack each GLB with [gltfpack 1.3](https://github.com/zeux/meshoptimizer/releases/tag/v1.3) before copying it to `assets/models`.
+The Blender script creates label textures in memory using `assets/models/textures`. It exports a GLB with packed label, roughness, and normal maps and a 1400 × 1050 ray-traced studio still. Export the still as a 1120 × 840 WebP at quality 89 under `assets/photos/studio-<slug>.webp`. The renderer uses the [Studio Small 09 HDRI](https://polyhaven.com/a/studio_small_09) by Sergej Majboroda, published by Poly Haven under CC0. Pack each GLB with [gltfpack 1.3](https://github.com/zeux/meshoptimizer/releases/tag/v1.3) before copying it to `assets/models`.
 
 ```bash
 for slug in daily-cleansing-foam hydrating-toner daily-face-moisturizer the-daily-duo; do
@@ -74,4 +74,4 @@ Each prompt begins with the following style direction.
 - **The Daily Duo**. Exactly two matte ivory skincare containers side by side, a taller foaming pump and a shorter airless pump, on dusty-coral stone with a single soft shared shadow.
 - **Fragrance-free**. A folded cream linen face cloth and a small, smooth dab of white moisturizer on a coral clay tile. A pared back, scent-free skincare still life with no floral styling.
 
-The interactive viewer is vendored from [Google Model Viewer 4.4.0](https://www.npmjs.com/package/@google/model-viewer/v/4.4.0). Its Apache 2.0 license is included under `assets/vendor`.
+The archived viewer library is vendored from [Google Model Viewer 4.4.0](https://www.npmjs.com/package/@google/model-viewer/v/4.4.0). Its Apache 2.0 license is included under `assets/vendor`.

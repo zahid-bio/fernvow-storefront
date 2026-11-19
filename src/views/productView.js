@@ -30,28 +30,11 @@ export function getPdpMediaOptions(product) {
         bundle: 'Two ivory bottles side by side on a coral ledge',
       }[product.category],
     },
-    ...(product.images.model ? [{
-      id: 'model',
-      label: 'View in 3D',
-      src: product.images.model,
-      alt: `Interactive 3D view of ${product.name}`,
-    }] : []),
   ];
 }
 
-export function renderPdpMedia(product, media) {
-  if (media.id === 'model') {
-    return `
-      <model-viewer class="pdp-stage__model"
-        src="${escapeHtml(media.src)}" poster="${escapeHtml(product.images.primary)}"
-        alt="${escapeHtml(media.alt)}" camera-controls touch-action="pan-y" interaction-prompt="none"
-        environment-image="assets/models/studio-small-09.hdr" tone-mapping="neutral" exposure=".88"
-        camera-orbit="172deg 80deg 105%" shadow-intensity="1" shadow-softness=".85">
-      </model-viewer>
-      <p class="pdp-model-hint">Drag or use the arrow keys to turn.</p>
-    `;
-  }
-  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media-kind="${media.id}" fetchpriority="high" />`;
+export function renderPdpMedia(media) {
+  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" fetchpriority="high" />`;
 }
 
 function renderIngredients(product) {
@@ -67,9 +50,9 @@ function renderIngredients(product) {
   `).join('');
 }
 
-function detailSection(title, content) {
+function detailSection(id, title, content) {
   return `
-    <details class="accordion-item">
+    <details class="accordion-item" id="${id}">
       <summary class="accordion-trigger">
         <span>${title}</span>${iconSvg('icon-chevron-down', 'accordion-trigger__chevron')}
       </summary>
@@ -89,8 +72,8 @@ function renderPurchaseButton(product, qty, primary = false) {
   `;
 }
 
-function renderProductStory(product, qty) {
-  const { name, slug, category, images } = product;
+function renderProductStory(product, qty, detailPhoto) {
+  const { name, category, images } = product;
   return `
     <section class="product-story" aria-labelledby="product-story-title">
       <div class="product-story__ritual">
@@ -106,19 +89,18 @@ function renderProductStory(product, qty) {
         </div>
       </div>
 
-      ${images.model ? `
-        <div class="product-story__studio">
-          <img src="assets/photos/studio-${escapeHtml(slug)}.webp" alt="Studio view of ${escapeHtml(name)} on warm stone"
-            width="1120" height="840" loading="lazy" decoding="async" />
-          <div class="product-story__copy">
-            <h2 class="store-heading">A closer look</h2>
-            <p>${escapeHtml(product.packaging.bottle)}. ${escapeHtml(product.packaging.pumpOrCap)}.</p>
-            <button type="button" class="btn btn--outline" data-action="open-product-model">
-              Explore in 3D ${iconSvg('icon-arrow-up-right', 'icon--sm')}
-            </button>
-          </div>
+      <div class="product-story__details">
+        <img src="${escapeHtml(detailPhoto.src)}" alt="${escapeHtml(detailPhoto.alt)}"
+          width="900" height="675" loading="lazy" decoding="async" />
+        <div class="product-story__copy">
+          <h2 class="store-heading">A closer look</h2>
+          <p>${escapeHtml(product.packaging.bottle)}. ${escapeHtml(product.packaging.pumpOrCap)}.</p>
+          <button type="button" class="btn btn--outline" data-action="open-product-ingredients"
+            aria-controls="pdp-ingredients">
+            See full ingredients ${iconSvg('icon-arrow-up-right', 'icon--sm')}
+          </button>
         </div>
-      ` : ''}
+      </div>
 
       <div class="product-story__purchase">
         <div>
@@ -158,12 +140,12 @@ export function renderProductView({ slug, qty = 1 }) {
       </nav>
       <div class="product-page__layout">
         <div class="product-page__media">
-          <div class="pdp-stage" id="pdp-stage">${renderPdpMedia(product, mediaOptions[0])}</div>
+          <div class="pdp-stage" id="pdp-stage">${renderPdpMedia(mediaOptions[0])}</div>
           <div class="product-gallery" role="group" aria-label="Product images">
             ${mediaOptions.map(({ id, label, src }) => `
               <button type="button" class="product-gallery__button" data-action="set-pdp-media"
                 data-media="${id}" data-slug="${slug}" aria-pressed="${String(id === 'studio')}" aria-controls="pdp-stage">
-                ${id === 'model' ? iconSvg('icon-label-spec') : `<img src="${escapeHtml(src)}" alt="" width="40" height="40" />`}
+                <img src="${escapeHtml(src)}" alt="" width="40" height="40" />
                 <span>${label}</span>
               </button>
             `).join('')}
@@ -209,8 +191,8 @@ export function renderProductView({ slug, qty = 1 }) {
           ` : ''}
 
           <div class="accordion-group">
-            ${detailSection('Ingredients', renderIngredients(product))}
-            ${detailSection('Formula and packaging', `
+            ${detailSection('pdp-ingredients', 'Ingredients', renderIngredients(product))}
+            ${detailSection('pdp-formula', 'Formula and packaging', `
               <dl class="product-specs">
                 <div><dt>pH</dt><dd>${escapeHtml(product.phRange)}</dd></div>
                 <div><dt>Fragrance</dt><dd>${escapeHtml(product.fragranceNote)}</dd></div>
@@ -220,7 +202,7 @@ export function renderProductView({ slug, qty = 1 }) {
           </div>
         </section>
       </div>
-      ${renderProductStory(product, qty)}
+      ${renderProductStory(product, qty, mediaOptions[1])}
       <section class="product-companions" aria-labelledby="companions-heading">
         <h2 id="companions-heading" class="store-heading">More for your routine</h2>
         <div class="shop-grid shop-grid--related">${companions.map(renderProductCard).join('')}</div>

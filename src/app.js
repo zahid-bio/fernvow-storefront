@@ -35,7 +35,6 @@ const state = {
 
 let lastTrigger = null;
 let checkoutRequest = null;
-let modelViewerModule;
 let disconnectCollectionObserver;
 
 function parseHash(rawHash) {
@@ -426,11 +425,13 @@ document.addEventListener('click', (event) => {
       selectCollection(actionEl.dataset.category);
       break;
     }
-    case 'open-product-model': {
-      const modelTab = document.querySelector('.product-gallery [data-media="model"]');
-      modelTab?.click();
-      modelTab?.focus({ preventScroll: true });
-      document.getElementById('pdp-stage')?.scrollIntoView({ block: 'center' });
+    case 'open-product-ingredients': {
+      const ingredients = document.getElementById('pdp-ingredients');
+      if (!ingredients) break;
+      ingredients.open = true;
+      const summary = ingredients.querySelector('summary');
+      summary.focus({ preventScroll: true });
+      summary.scrollIntoView({ block: 'center' });
       break;
     }
     case 'set-pdp-media': {
@@ -440,31 +441,11 @@ document.addEventListener('click', (event) => {
       if (!media || actionEl.getAttribute('aria-pressed') === 'true') break;
 
       const stage = document.getElementById('pdp-stage');
-      stage.innerHTML = renderPdpMedia(product, media);
+      stage.innerHTML = renderPdpMedia(media);
       for (const button of document.querySelectorAll('[data-action="set-pdp-media"]')) {
         button.setAttribute('aria-pressed', String(button === actionEl));
       }
 
-      if (media.id === 'model') {
-        const viewer = stage.querySelector('model-viewer');
-        const showFallback = () => {
-          if (!viewer.isConnected) return;
-          stage.innerHTML = renderPdpMedia(product, getPdpMediaOptions(product)[0]);
-          const message = document.createElement('p');
-          message.className = 'pdp-model-hint';
-          message.setAttribute('role', 'status');
-          message.textContent = 'The 3D view couldn’t load.';
-          stage.append(message);
-          actionEl.setAttribute('aria-pressed', 'false');
-          document.querySelector('[data-media="studio"]')?.setAttribute('aria-pressed', 'true');
-        };
-        viewer.addEventListener('error', showFallback, { once: true });
-        modelViewerModule ??= import('../assets/vendor/model-viewer.min.js').catch((error) => {
-          modelViewerModule = null;
-          throw error;
-        });
-        modelViewerModule.catch(showFallback);
-      }
       break;
     }
     case 'set-pdp-qty': {

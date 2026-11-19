@@ -101,7 +101,6 @@ export const PRODUCTS = [
     },
     images: {
       primary: 'assets/photos/daily-cleansing-foam-photo.webp',
-      model: 'assets/models/daily-cleansing-foam.glb',
       editorialImage: 'assets/photos/ritual-cleanse.webp',
       editorialAlt: 'Hands working cleanser into a foam beside the Daily Cleansing Foam bottle',
       vectorConcept: 'assets/products/daily-cleansing-foam.svg',
@@ -175,7 +174,6 @@ export const PRODUCTS = [
     },
     images: {
       primary: 'assets/photos/the-daily-duo-photo.webp',
-      model: 'assets/models/the-daily-duo.glb',
       editorialImage: 'assets/photos/ritual-duo.webp',
       editorialAlt: 'The Daily Duo on folded linen beside a ceramic tray',
       vectorConcept: 'assets/products/the-daily-duo.svg',
@@ -258,7 +256,6 @@ export const PRODUCTS = [
     },
     images: {
       primary: 'assets/photos/daily-face-moisturizer-photo.webp',
-      model: 'assets/models/daily-face-moisturizer.glb',
       editorialImage: 'assets/photos/ritual-moisturize.webp',
       editorialAlt: 'A small amount of face moisturizer applied to the back of a hand',
       vectorConcept: 'assets/products/daily-face-moisturizer.svg',
@@ -326,7 +323,6 @@ export const PRODUCTS = [
     },
     images: {
       primary: 'assets/photos/hydrating-toner-photo.webp',
-      model: 'assets/models/hydrating-toner.glb',
       editorialImage: 'assets/photos/ritual-tone.webp',
       editorialAlt: 'Drops of toner falling into a hand beside the Hydrating Toner bottle',
       vectorConcept: 'assets/products/hydrating-toner.svg',

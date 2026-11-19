@@ -1,6 +1,6 @@
 # Fernvow
 
-A static skincare storefront with a six-category catalog, product details, interactive 3D packaging and a persistent shopping bag.
+A static skincare storefront with a six-category catalog, product details, photo galleries and a persistent shopping bag.
 
 ## Run locally
 
