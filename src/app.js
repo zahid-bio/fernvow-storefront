@@ -36,6 +36,7 @@ const state = {
 let lastTrigger = null;
 let checkoutRequest = null;
 let modelViewerModule;
+let disconnectCollectionObserver;
 
 function parseHash(rawHash) {
   const decode = (segment) => {
@@ -196,9 +197,10 @@ function renderRoute() {
     isMobileMenuOpen: state.isMobileMenuOpen,
   });
 
+  disconnectCollectionObserver?.();
   mainEl.innerHTML = renderActiveViewHtml();
   const explorer = mainEl.querySelector('[data-collection-explorer]');
-  if (explorer) bindCollectionControls(explorer);
+  disconnectCollectionObserver = explorer ? bindCollectionControls(explorer) : null;
 
   footerRoot.innerHTML = renderFooter();
 
@@ -243,46 +245,62 @@ function updateCatalogInPlace() {
   return count;
 }
 
-function selectCollection(id, direction = 1) {
+function syncCategoryTicker(explorer, animate = false) {
+  const track = explorer.querySelector('.cat-ticker__track');
+  const selected = track.querySelector('[aria-selected="true"]');
+  track.classList.toggle('is-sliding', animate);
+  track.style.setProperty('--ticker-offset', `${-(selected.offsetLeft + selected.offsetWidth / 2)}px`);
+}
+
+function selectCollection(id) {
   if (id === state.activeFilter) return;
   const explorer = document.querySelector('[data-collection-explorer]');
-  const previous = state.activeFilter;
   state.activeFilter = id;
-  explorer.dataset.direction = direction < 0 ? 'back' : 'forward';
-
-  for (const slide of explorer.querySelectorAll('[data-collection-slide]')) {
-    slide.classList.toggle('is-departing', slide.dataset.collectionSlide === previous);
-    slide.classList.toggle('is-active', slide.dataset.collectionSlide === id);
+  for (const photo of explorer.querySelectorAll('.cat-stage__bg')) {
+    photo.classList.toggle('is-active', photo.dataset.cat === id);
   }
-  for (const button of explorer.querySelectorAll('.collection-filter')) {
-    button.setAttribute('aria-pressed', String(button.dataset.category === id));
+  for (const tab of explorer.querySelectorAll('.cat-ticker__btn')) {
+    const selected = tab.dataset.category === id;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
   }
-  for (const button of explorer.querySelectorAll('.collection-step')) {
-    button.querySelector('.collection-step__label').textContent =
-      getAdjacentCollection(id, Number(button.dataset.step)).title;
-  }
+  syncCategoryTicker(explorer, true);
 
   const count = updateCatalogInPlace();
-  document.querySelector('#catalog-grid-slot > .shop-grid').classList.add('is-filtered');
-  const title = explorer.querySelector('.collection-filter[aria-pressed="true"]').textContent;
+  const panel = document.getElementById('catalog-grid-slot');
+  panel.setAttribute('aria-labelledby', `collection-tab-${id}`);
+  panel.firstElementChild.classList.add('is-filtered');
+  const title = explorer.querySelector('.cat-ticker__btn[aria-selected="true"] .cat-ticker__title').textContent;
   announce(`${title}. ${count} ${count === 1 ? 'product' : 'products'} shown.`);
 }
 
 function stepCollection(step) {
-  selectCollection(getAdjacentCollection(state.activeFilter, step).id, step);
+  selectCollection(getAdjacentCollection(state.activeFilter, step).id);
 }
 
 function bindCollectionControls(explorer) {
-  explorer.addEventListener('keydown', (event) => {
-    if (!['ArrowLeft', 'ArrowRight'].includes(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
-    event.preventDefault();
-    stepCollection(event.key === 'ArrowLeft' ? -1 : 1);
-    if (event.target.matches('.collection-filter')) {
-      explorer.querySelector('.collection-filter[aria-pressed="true"]').focus();
-    }
+  const stage = explorer.querySelector('.cat-stage');
+  syncCategoryTicker(explorer);
+  const resizeObserver = new ResizeObserver(() => syncCategoryTicker(explorer));
+  resizeObserver.observe(stage);
+  document.fonts.ready.then(() => {
+    if (explorer.isConnected) syncCategoryTicker(explorer);
   });
 
-  const stage = explorer.querySelector('.collection-stage');
+  explorer.querySelector('[role="tablist"]').addEventListener('keydown', (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const tabs = [...explorer.querySelectorAll('.cat-ticker__btn')];
+    switch (event.key) {
+      case 'ArrowLeft': stepCollection(-1); break;
+      case 'ArrowRight': stepCollection(1); break;
+      case 'Home': selectCollection(tabs[0].dataset.category); break;
+      case 'End': selectCollection(tabs.at(-1).dataset.category); break;
+      default: return;
+    }
+    event.preventDefault();
+    explorer.querySelector('.cat-ticker__btn[aria-selected="true"]').focus({ preventScroll: true });
+  });
+
   let touchStart;
   stage.addEventListener('pointerdown', (event) => {
     if (event.pointerType !== 'touch' || !event.isPrimary || event.target.closest('button')) return;
@@ -296,6 +314,7 @@ function bindCollectionControls(explorer) {
     if (Math.abs(x) >= 40 && Math.abs(x) > Math.abs(y) * 1.4) stepCollection(x < 0 ? 1 : -1);
   });
   stage.addEventListener('pointercancel', () => { touchStart = null; });
+  return () => resizeObserver.disconnect();
 }
 
 async function startCheckout() {
@@ -333,9 +352,7 @@ function scrollToSection(id) {
   const section = document.getElementById(id);
   if (!section) return;
   section.scrollIntoView();
-  const heading = section.querySelector('h1, h2');
-  heading?.setAttribute('tabindex', '-1');
-  heading?.focus({ preventScroll: true });
+  section.querySelector('.cat-ticker__btn[aria-selected="true"]')?.focus({ preventScroll: true });
 }
 
 document.addEventListener('click', (event) => {
@@ -406,13 +423,7 @@ document.addEventListener('click', (event) => {
       break;
     }
     case 'set-category': {
-      const buttons = [...actionEl.parentElement.children];
-      const current = buttons.findIndex((button) => button.dataset.category === state.activeFilter);
-      selectCollection(actionEl.dataset.category, buttons.indexOf(actionEl) - current);
-      break;
-    }
-    case 'step-category': {
-      stepCollection(Number(actionEl.dataset.step));
+      selectCollection(actionEl.dataset.category);
       break;
     }
     case 'set-pdp-media': {

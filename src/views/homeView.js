@@ -1,54 +1,55 @@
 import { PRODUCTS, formatMoney, getProductBySlug } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from '../components/header.js';
 
-const CATEGORIES = [
-  { id: 'all', title: 'All skincare', image: 'all' },
-  { id: 'cleanse', title: 'Cleansers', image: 'cleanse' },
-  { id: 'tone', title: 'Toners', image: 'tone' },
-  { id: 'moisturize', title: 'Moisturizers', image: 'moisturize' },
-  { id: 'bundle', title: 'The Daily Duo', image: 'duo' },
-  { id: 'fragrance-free', title: 'Fragrance-free', image: 'fragrance' },
+const TICKER_ITEMS = [
+  { id: 'cleanse', title: 'cleansing', label: 'Cleanse', image: 'cleanse' },
+  { id: 'tone', title: 'toning', label: 'Tone', image: 'tone' },
+  { id: 'all', title: 'all formulas', label: 'All', image: 'all' },
+  { id: 'moisturize', title: 'moisturizing', label: 'Moisturize', image: 'moisturize' },
+  { id: 'bundle', title: 'the duo', label: 'The Duo', image: 'duo' },
+  { id: 'fragrance-free', title: 'fragrance-free', label: 'Fragrance-free', image: 'fragrance' },
 ];
 
 export function getAdjacentCollection(activeFilter, step) {
-  const index = CATEGORIES.findIndex(({ id }) => id === activeFilter);
-  return CATEGORIES[(index + step + CATEGORIES.length) % CATEGORIES.length];
+  const index = TICKER_ITEMS.findIndex(({ id }) => id === activeFilter);
+  return TICKER_ITEMS[(index + step + TICKER_ITEMS.length) % TICKER_ITEMS.length];
 }
 
-function renderCollectionExplorer(activeFilter) {
+function renderCollectionExplorer(activeFilter, sortBy) {
   return `
-    <div class="collection-explorer" data-collection-explorer>
-      <div class="collection-stage">
-        <div class="collection-stage__images" aria-hidden="true">
-          ${CATEGORIES.map(({ id, image }) => `
-            <img src="assets/photos/collection-${image}.webp" alt="" width="900" height="675"
-              loading="lazy" decoding="async" data-collection-slide="${id}" class="${id === activeFilter ? 'is-active' : ''}" />
+    <div data-collection-explorer>
+      <div class="cat-stage">
+        <div class="cat-stage__bgs" aria-hidden="true">
+          ${TICKER_ITEMS.map(({ id, image }) => `
+            <picture class="cat-stage__bg ${id === activeFilter ? 'is-active' : ''}" data-cat="${id}">
+              <source media="(max-width: 640px)" srcset="assets/photos/ticker-${image}-mobile.webp" width="720" height="720" />
+              <img src="assets/photos/ticker-${image}-wide.webp" alt="" width="1600" height="640"
+                loading="lazy" decoding="async" />
+            </picture>
           `).join('')}
         </div>
-        <div class="collection-stage__ticker">
-          <button type="button" class="collection-step" data-action="step-category" data-step="-1"
-            aria-label="Previous category" aria-controls="catalog-grid-slot">
-            ${iconSvg('icon-arrow-left')}
-            <span class="collection-step__label" aria-hidden="true">${getAdjacentCollection(activeFilter, -1).title}</span>
-          </button>
-          <div class="collection-stage__titles" aria-hidden="true">
-            ${CATEGORIES.map(({ id, title }) => `
-              <span data-collection-slide="${id}" class="${id === activeFilter ? 'is-active' : ''}">${title}</span>
+        <div class="cat-ticker-viewport" role="tablist" aria-label="Skincare categories">
+          <div class="cat-ticker__track">
+            ${TICKER_ITEMS.map(({ id, title, label }) => `
+              <button type="button" role="tab" id="collection-tab-${id}" class="cat-ticker__btn"
+                data-action="set-category" data-category="${id}" aria-selected="${String(id === activeFilter)}"
+                tabindex="${id === activeFilter ? '0' : '-1'}" aria-controls="catalog-grid-slot">
+                <span class="cat-ticker__title">${title}</span>
+                <span class="cat-ticker__short" aria-hidden="true">${label}</span>
+              </button>
             `).join('')}
           </div>
-          <button type="button" class="collection-step" data-action="step-category" data-step="1"
-            aria-label="Next category" aria-controls="catalog-grid-slot">
-            <span class="collection-step__label" aria-hidden="true">${getAdjacentCollection(activeFilter, 1).title}</span>
-            ${iconSvg('icon-arrow-right')}
-          </button>
         </div>
       </div>
-
-      <div class="collection-filters" role="group" aria-label="Filter skincare">
-        ${CATEGORIES.map(({ id, title }) => `
-          <button type="button" class="collection-filter" data-action="set-category" data-category="${id}"
-            aria-pressed="${String(activeFilter === id)}" aria-controls="catalog-grid-slot">${title}</button>
-        `).join('')}
+      <div class="container collection-tools">
+        <div class="shop-sort">
+          <label for="catalog-sort-select">Sort by</label>
+          <select id="catalog-sort-select" data-action="set-sort">
+            <option value="featured"${sortBy === 'featured' ? ' selected' : ''}>Featured</option>
+            <option value="price-asc"${sortBy === 'price-asc' ? ' selected' : ''}>Price, low to high</option>
+            <option value="price-desc"${sortBy === 'price-desc' ? ' selected' : ''}>Price, high to low</option>
+          </select>
+        </div>
       </div>
     </div>
   `;
@@ -78,8 +79,8 @@ export function renderProductCard(product) {
   const name = escapeHtml(product.name);
   return `
     <article class="shop-card">
-      <a href="#/product/${slug}" class="shop-card__photo" data-category="${product.category}" tabindex="-1" aria-hidden="true">
-        <img src="${escapeHtml(product.images.primary)}" alt="" loading="lazy" width="850" height="950" />
+      <a href="#/product/${slug}" class="shop-card__photo" tabindex="-1" aria-hidden="true">
+        <img src="${escapeHtml(product.images.primary)}" alt="" loading="lazy" width="960" height="1200" />
       </a>
       <div class="shop-card__info">
         <h3><a href="#/product/${slug}">${name}</a></h3>
@@ -124,8 +125,8 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
           </div>
         </div>
         <a href="#/product/${foam.slug}" class="store-hero__art" aria-label="View Daily Cleansing Foam">
-          <img src="assets/photos/hero-cleanser.webp" alt="Fernvow Daily Cleansing Foam bottle"
-            width="850" height="950" fetchpriority="high" />
+          <img src="assets/photos/hero-cleanser-photo.webp" alt="Fernvow Daily Cleansing Foam on coral stone beside a dish of foam"
+            width="1080" height="1080" fetchpriority="high" />
           <span class="store-hero__product">
             <span>${escapeHtml(foam.name)}</span>
             <strong>${formatMoney(foam.price)}</strong>
@@ -134,20 +135,11 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
       </div>
     </section>
 
-    <section class="shop-collection container" id="collection" aria-labelledby="collection-title">
-      <div class="shop-collection__heading">
-        <h2 class="store-heading" id="collection-title">Shop skincare</h2>
-        <div class="shop-sort">
-          <label for="catalog-sort-select">Sort by</label>
-          <select id="catalog-sort-select" data-action="set-sort">
-            <option value="featured"${sortBy === 'featured' ? ' selected' : ''}>Featured</option>
-            <option value="price-asc"${sortBy === 'price-asc' ? ' selected' : ''}>Price, low to high</option>
-            <option value="price-desc"${sortBy === 'price-desc' ? ' selected' : ''}>Price, high to low</option>
-          </select>
-        </div>
-      </div>
-      ${renderCollectionExplorer(activeFilter)}
-      <div id="catalog-grid-slot">${renderHomeCatalogGrid(activeFilter, sortBy)}</div>
+    <section class="shop-collection" id="collection" aria-labelledby="collection-title">
+      <h2 class="sr-only" id="collection-title">Shop skincare</h2>
+      ${renderCollectionExplorer(activeFilter, sortBy)}
+      <div id="catalog-grid-slot" class="container" role="tabpanel" tabindex="0"
+        aria-labelledby="collection-tab-${activeFilter}">${renderHomeCatalogGrid(activeFilter, sortBy)}</div>
     </section>
 
     <section class="container routine-feature" aria-labelledby="routine-feature-title">

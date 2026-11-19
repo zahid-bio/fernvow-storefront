@@ -100,7 +100,7 @@ export const PRODUCTS = [
         'Separate the PP #5 pump and cap from the HDPE #2 bottle before recycling according to local guidance.',
     },
     images: {
-      primary: 'assets/photos/daily-cleansing-foam-render.webp',
+      primary: 'assets/photos/daily-cleansing-foam-photo.webp',
       model: 'assets/models/daily-cleansing-foam.glb',
       editorialImage: 'assets/photos/editorial-lifestyle-portrait.jpg',
       vectorConcept: 'assets/products/daily-cleansing-foam.svg',
@@ -173,7 +173,7 @@ export const PRODUCTS = [
         'Foam: separate PP #5 pump from HDPE #2 bottle before recycling. Moisturizer: mono-material PP #5 (no separation needed).',
     },
     images: {
-      primary: 'assets/photos/the-daily-duo-render.webp',
+      primary: 'assets/photos/the-daily-duo-photo.webp',
       model: 'assets/models/the-daily-duo.glb',
       editorialImage: 'assets/photos/hero-vanity-editorial.jpg',
       vectorConcept: 'assets/products/the-daily-duo.svg',
@@ -255,7 +255,7 @@ export const PRODUCTS = [
         'Mono-material PP #5 across bottle, actuator, and cap — no separation required before local recycling.',
     },
     images: {
-      primary: 'assets/photos/daily-face-moisturizer-render.webp',
+      primary: 'assets/photos/daily-face-moisturizer-photo.webp',
       model: 'assets/models/daily-face-moisturizer.glb',
       editorialImage: 'assets/photos/editorial-foam-texture.jpg',
       vectorConcept: 'assets/products/daily-face-moisturizer.svg',
@@ -322,7 +322,7 @@ export const PRODUCTS = [
         'Separate the PP #5 disc-top cap from the PET #1 bottle before recycling according to local guidance.',
     },
     images: {
-      primary: 'assets/photos/hydrating-toner-render.webp',
+      primary: 'assets/photos/hydrating-toner-photo.webp',
       model: 'assets/models/hydrating-toner.glb',
       editorialImage: 'assets/photos/editorial-botanical-wall.jpg',
       vectorConcept: 'assets/products/hydrating-toner.svg',
