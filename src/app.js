@@ -9,6 +9,8 @@ import { renderFooter } from './components/footer.js';
 import { renderCartDrawer } from './components/cartDrawer.js';
 import { renderSearchModal, renderSearchResults } from './components/searchModal.js';
 import {
+  filterAndSortProducts,
+  formatProductCount,
   getAdjacentCollection,
   renderHomeCatalogGrid,
   renderHomeView,
@@ -240,9 +242,10 @@ function focusElementSoon(selector) {
 function updateCatalogInPlace() {
   const slot = document.getElementById('catalog-grid-slot');
   if (!slot) return;
-  slot.innerHTML = renderHomeCatalogGrid(state.activeFilter, state.sortBy);
-  const count = Number(slot.querySelector('[data-filter-count]').dataset.filterCount);
-  return count;
+  const products = filterAndSortProducts(state.activeFilter, state.sortBy);
+  slot.innerHTML = renderHomeCatalogGrid(products);
+  document.querySelector('[data-collection-count]').textContent = formatProductCount(products.length);
+  return products.length;
 }
 
 function syncCategoryTicker(explorer, animate = false) {
@@ -271,7 +274,7 @@ function selectCollection(id) {
   panel.setAttribute('aria-labelledby', `collection-tab-${id}`);
   panel.firstElementChild.classList.add('is-filtered');
   const title = explorer.querySelector('.cat-ticker__btn[aria-selected="true"] .cat-ticker__title').textContent;
-  announce(`${title}. ${count} ${count === 1 ? 'product' : 'products'} shown.`);
+  announce(`${title}. ${formatProductCount(count)} shown.`);
 }
 
 function stepCollection(step) {
@@ -426,6 +429,10 @@ document.addEventListener('click', (event) => {
       selectCollection(actionEl.dataset.category);
       break;
     }
+    case 'step-category': {
+      stepCollection(Number(actionEl.dataset.step));
+      break;
+    }
     case 'set-pdp-media': {
       const product = getProductBySlug(state.route.slug);
       if (!product) break;
@@ -511,7 +518,7 @@ document.addEventListener('change', (event) => {
   if (target instanceof HTMLSelectElement && target.dataset.action === 'set-sort') {
     state.sortBy = target.value || 'featured';
     const count = updateCatalogInPlace();
-    announce(`${count} ${count === 1 ? 'product' : 'products'} shown.`);
+    announce(`${formatProductCount(count)} shown.`);
   }
 });
 

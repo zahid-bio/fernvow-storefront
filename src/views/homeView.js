@@ -15,7 +15,11 @@ export function getAdjacentCollection(activeFilter, step) {
   return TICKER_ITEMS[(index + step + TICKER_ITEMS.length) % TICKER_ITEMS.length];
 }
 
-function renderCollectionExplorer(activeFilter, sortBy) {
+export function formatProductCount(count) {
+  return `${count} ${count === 1 ? 'product' : 'products'}`;
+}
+
+function renderCollectionExplorer(activeFilter, sortBy, productCount) {
   return `
     <div data-collection-explorer>
       <div class="cat-stage">
@@ -40,8 +44,19 @@ function renderCollectionExplorer(activeFilter, sortBy) {
             `).join('')}
           </div>
         </div>
+        <div class="cat-stage__controls" role="group" aria-label="Browse categories">
+          <button type="button" class="cat-stage__arrow cat-stage__arrow--prev" data-action="step-category"
+            data-step="-1" aria-label="Previous category" aria-controls="catalog-grid-slot">
+            ${iconSvg('icon-chevron-down', 'icon--sm')}
+          </button>
+          <button type="button" class="cat-stage__arrow cat-stage__arrow--next" data-action="step-category"
+            data-step="1" aria-label="Next category" aria-controls="catalog-grid-slot">
+            ${iconSvg('icon-chevron-down', 'icon--sm')}
+          </button>
+        </div>
       </div>
       <div class="container collection-tools">
+        <p class="collection-tools__count" data-collection-count>${formatProductCount(productCount)}</p>
         <div class="shop-sort">
           <label for="catalog-sort-select">Sort by</label>
           <select id="catalog-sort-select" data-action="set-sort">
@@ -56,9 +71,9 @@ function renderCollectionExplorer(activeFilter, sortBy) {
 }
 
 const QUESTIONS = [
-  ['Where should I start?', 'Start with the Daily Cleansing Foam. Add moisturizer afterward if you want a simple two-step routine.'],
-  ['Which products are fragrance-free?', 'The Hydrating Toner and Daily Face Moisturizer are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
-  ['Do I need to use all three steps?', 'No. Cleanse and moisturize for a simple routine. Add the toner in between if you like a light layer of hydration.'],
+  ['Where should I start?', 'Start with the <a href="#/product/daily-cleansing-foam">Daily Cleansing Foam</a>. For a simple two-step routine, <a href="#/product/the-daily-duo">The Daily Duo</a> pairs it with moisturizer.'],
+  ['Which products are fragrance-free?', 'The <a href="#/product/hydrating-toner">Hydrating Toner</a> and <a href="#/product/daily-face-moisturizer">Daily Face Moisturizer</a> are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
+  ['Do I need to use all three steps?', 'Cleanse and moisturize for a simple routine. Add the <a href="#/product/hydrating-toner">Hydrating Toner</a> in between if you like a light layer of hydration.'],
 ];
 
 export function filterAndSortProducts(activeFilter = 'all', sortBy = 'featured') {
@@ -101,10 +116,9 @@ export function renderProductCard(product) {
   `;
 }
 
-export function renderHomeCatalogGrid(activeFilter = 'all', sortBy = 'featured') {
-  const products = filterAndSortProducts(activeFilter, sortBy);
+export function renderHomeCatalogGrid(products) {
   return `
-    <div class="shop-grid" data-filter-count="${products.length}">
+    <div class="shop-grid">
       ${products.map(renderProductCard).join('')}
     </div>
   `;
@@ -126,6 +140,7 @@ function renderHeroFeature(product, slot) {
 export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
   const foam = getProductBySlug('daily-cleansing-foam');
   const duo = getProductBySlug('the-daily-duo');
+  const products = filterAndSortProducts(activeFilter, sortBy);
 
   return `
     <section class="store-hero container" aria-labelledby="store-title">
@@ -158,9 +173,9 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
 
     <section class="shop-collection" id="collection" aria-labelledby="collection-title">
       <h2 class="sr-only" id="collection-title">Shop skincare</h2>
-      ${renderCollectionExplorer(activeFilter, sortBy)}
+      ${renderCollectionExplorer(activeFilter, sortBy, products.length)}
       <div id="catalog-grid-slot" class="container" role="tabpanel" tabindex="0"
-        aria-labelledby="collection-tab-${activeFilter}">${renderHomeCatalogGrid(activeFilter, sortBy)}</div>
+        aria-labelledby="collection-tab-${activeFilter}">${renderHomeCatalogGrid(products)}</div>
     </section>
 
     <section class="container routine-feature" aria-labelledby="routine-feature-title">
