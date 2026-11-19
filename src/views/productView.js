@@ -9,6 +9,13 @@ const GALLERY_IMAGES = {
   bundle: 'duo',
 };
 
+const RITUAL_HEADLINES = {
+  cleanse: 'Start with a fresh face.',
+  tone: 'A little hydration in between.',
+  moisturize: 'Finish with a light layer.',
+  bundle: 'Two steps, morning or evening.',
+};
+
 export function getPdpMediaOptions(product) {
   return [
     { id: 'studio', label: 'Product', src: product.images.primary, alt: product.images.alt },
@@ -38,8 +45,8 @@ export function renderPdpMedia(product, media) {
       <model-viewer class="pdp-stage__model"
         src="${escapeHtml(media.src)}" poster="${escapeHtml(product.images.primary)}"
         alt="${escapeHtml(media.alt)}" camera-controls touch-action="pan-y" interaction-prompt="none"
-        camera-orbit="172deg 80deg 105%"
-        shadow-intensity="1">
+        environment-image="assets/models/studio-small-09.hdr" tone-mapping="neutral" exposure=".88"
+        camera-orbit="172deg 80deg 105%" shadow-intensity="1" shadow-softness=".85">
       </model-viewer>
       <p class="pdp-model-hint">Drag or use the arrow keys to turn.</p>
     `;
@@ -68,6 +75,59 @@ function detailSection(title, content) {
       </summary>
       <div class="accordion-body">${content}</div>
     </details>
+  `;
+}
+
+function renderPurchaseButton(product, qty, primary = false) {
+  return `
+    <button type="button" ${primary ? 'id="pdp-add-btn"' : ''}
+      class="btn btn--fern${primary ? ' btn--full' : ''}" data-pdp-add data-action="add-to-cart"
+      data-slug="${escapeHtml(product.slug)}" data-qty="${qty}">
+      ${iconSvg('icon-bag')}
+      <span data-pdp-add-text ${primary ? 'id="pdp-add-btn-text"' : ''}>Add to bag &mdash; ${formatMoney(product.price * qty)}</span>
+    </button>
+  `;
+}
+
+function renderProductStory(product, qty) {
+  const { name, slug, category, images } = product;
+  return `
+    <section class="product-story" aria-labelledby="product-story-title">
+      <div class="product-story__ritual">
+        <img src="${escapeHtml(images.editorialImage)}" alt="${escapeHtml(images.editorialAlt)}"
+          width="1040" height="780" loading="lazy" decoding="async" />
+        <div class="product-story__copy">
+          <p class="section-label">How to use</p>
+          <h2 class="store-heading" id="product-story-title">${RITUAL_HEADLINES[category]}</h2>
+          <p>${escapeHtml(product.shortDescription)}</p>
+          <ol class="product-directions product-story__directions">
+            ${product.directions.map(({ text }) => `<li>${escapeHtml(text)}</li>`).join('')}
+          </ol>
+        </div>
+      </div>
+
+      ${images.model ? `
+        <div class="product-story__studio">
+          <img src="assets/photos/studio-${escapeHtml(slug)}.webp" alt="Studio view of ${escapeHtml(name)} on warm stone"
+            width="1120" height="840" loading="lazy" decoding="async" />
+          <div class="product-story__copy">
+            <h2 class="store-heading">A closer look</h2>
+            <p>${escapeHtml(product.packaging.bottle)}. ${escapeHtml(product.packaging.pumpOrCap)}.</p>
+            <button type="button" class="btn btn--outline" data-action="open-product-model">
+              Explore in 3D ${iconSvg('icon-arrow-up-right', 'icon--sm')}
+            </button>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="product-story__purchase">
+        <div>
+          <h2>${escapeHtml(name)}</h2>
+          <p>${escapeHtml(product.benefit)}</p>
+        </div>
+        ${renderPurchaseButton(product, qty)}
+      </div>
+    </section>
   `;
 }
 
@@ -128,12 +188,14 @@ export function renderProductView({ slug, qty = 1 }) {
               <button type="button" id="pdp-qty-inc" class="qty-stepper__btn" data-action="set-pdp-qty"
                 data-price="${product.price}" data-qty="${qty + 1}" aria-label="Increase quantity">${iconSvg('icon-plus')}</button>
             </div>
-            <button type="button" id="pdp-add-btn" class="btn btn--fern btn--full" data-action="add-to-cart"
-              data-slug="${slug}" data-qty="${qty}">
-              ${iconSvg('icon-bag')}
-              <span id="pdp-add-btn-text">Add to bag &mdash; ${formatMoney(product.price * qty)}</span>
-            </button>
+            ${renderPurchaseButton(product, qty, true)}
           </div>
+
+          <dl class="product-quick-facts" aria-label="Formula at a glance">
+            <div><dt>Texture</dt><dd>${escapeHtml(product.texture)}</dd></div>
+            <div><dt>Finish</dt><dd>${escapeHtml(product.finish)}</dd></div>
+            <div><dt>Skin type</dt><dd>${escapeHtml(product.skinTypes)}</dd></div>
+          </dl>
 
           ${product.bundleComponents ? `
             <div class="product-includes">
@@ -147,24 +209,18 @@ export function renderProductView({ slug, qty = 1 }) {
           ` : ''}
 
           <div class="accordion-group">
-            ${detailSection('How to use', `
-              <ol class="product-directions">${product.directions.map(({ text }) => `<li>${escapeHtml(text)}</li>`).join('')}</ol>
-            `)}
             ${detailSection('Ingredients', renderIngredients(product))}
             ${detailSection('Formula and packaging', `
               <dl class="product-specs">
-                <div><dt>Skin type</dt><dd>${escapeHtml(product.skinTypes)}</dd></div>
-                <div><dt>Texture</dt><dd>${escapeHtml(product.texture)}</dd></div>
                 <div><dt>pH</dt><dd>${escapeHtml(product.phRange)}</dd></div>
                 <div><dt>Fragrance</dt><dd>${escapeHtml(product.fragranceNote)}</dd></div>
-                <div><dt>Bottle</dt><dd>${escapeHtml(product.packaging.bottle)}</dd></div>
-                <div><dt>Closure</dt><dd>${escapeHtml(product.packaging.pumpOrCap)}</dd></div>
               </dl>
               <p>${escapeHtml(product.packaging.recycling)}</p>
             `)}
           </div>
         </section>
       </div>
+      ${renderProductStory(product, qty)}
       <section class="product-companions" aria-labelledby="companions-heading">
         <h2 id="companions-heading" class="store-heading">More for your routine</h2>
         <div class="shop-grid shop-grid--related">${companions.map(renderProductCard).join('')}</div>

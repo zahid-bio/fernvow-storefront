@@ -426,6 +426,13 @@ document.addEventListener('click', (event) => {
       selectCollection(actionEl.dataset.category);
       break;
     }
+    case 'open-product-model': {
+      const modelTab = document.querySelector('.product-gallery [data-media="model"]');
+      modelTab?.click();
+      modelTab?.focus({ preventScroll: true });
+      document.getElementById('pdp-stage')?.scrollIntoView({ block: 'center' });
+      break;
+    }
     case 'set-pdp-media': {
       const product = getProductBySlug(state.route.slug);
       if (!product) break;
@@ -467,16 +474,16 @@ document.addEventListener('click', (event) => {
       const valEl = document.getElementById('pdp-qty-val');
       const decBtn = document.getElementById('pdp-qty-dec');
       const incBtn = document.getElementById('pdp-qty-inc');
-      const addBtn = document.getElementById('pdp-add-btn');
-      const addText = document.getElementById('pdp-add-btn-text');
       if (valEl) valEl.textContent = String(nextQty);
       if (decBtn) {
         decBtn.dataset.qty = String(Math.max(1, nextQty - 1));
         decBtn.setAttribute('aria-disabled', String(nextQty <= 1));
       }
       if (incBtn) incBtn.dataset.qty = String(nextQty + 1);
-      if (addBtn) addBtn.dataset.qty = String(nextQty);
-      if (addText) addText.textContent = `Add to bag — ${formatMoney(price * nextQty)}`;
+      for (const button of document.querySelectorAll('[data-pdp-add]')) {
+        button.dataset.qty = String(nextQty);
+        button.querySelector('[data-pdp-add-text]').textContent = `Add to bag — ${formatMoney(price * nextQty)}`;
+      }
       break;
     }
     case 'add-to-cart': {

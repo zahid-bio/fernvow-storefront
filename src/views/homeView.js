@@ -107,31 +107,49 @@ export function renderHomeCatalogGrid(activeFilter = 'all', sortBy = 'featured')
   `;
 }
 
+function renderHeroFeature(product, slot) {
+  return `
+    <a href="#/product/${product.slug}" class="hero-feature hero-feature--${slot}">
+      <img src="${escapeHtml(product.images.editorialImage)}" alt="" width="480" height="360" decoding="async" />
+      <span class="hero-feature__text">
+        <span>${escapeHtml(product.name)}</span>
+        <strong>${formatMoney(product.price)}</strong>
+      </span>
+      ${iconSvg('icon-arrow-up-right', 'hero-feature__arrow')}
+    </a>
+  `;
+}
+
 export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
   const foam = getProductBySlug('daily-cleansing-foam');
+  const duo = getProductBySlug('the-daily-duo');
 
   return `
     <section class="store-hero container" aria-labelledby="store-title">
       <div class="store-hero__layout">
         <div class="store-hero__copy">
-          <p class="section-label">Daily skincare</p>
-          <h1 id="store-title">A fresh start<br />for your <em>skin.</em></h1>
-          <p>Lift away the day with a soft, airy cleanser that leaves skin feeling clean and comfortable.</p>
-          <div class="store-hero__actions">
-            <a href="#/product/${foam.slug}" class="btn btn--fern">
-              Shop the cleanser ${iconSvg('icon-arrow-right', 'icon--sm')}
-            </a>
-            <a href="#collection" class="store-text-link" data-action="scroll-collection">Browse all skincare</a>
-          </div>
+          <h1 id="store-title">Make time for <em>your skin.</em></h1>
+          <p>An airy cleanse, a splash of hydration, and a soft finish.</p>
         </div>
-        <a href="#/product/${foam.slug}" class="store-hero__art" aria-label="View Daily Cleansing Foam">
-          <img src="assets/photos/hero-cleanser-photo.webp" alt="Fernvow Daily Cleansing Foam on coral stone beside a dish of foam"
-            width="1080" height="1080" fetchpriority="high" />
-          <span class="store-hero__product">
-            <span>${escapeHtml(foam.name)}</span>
-            <strong>${formatMoney(foam.price)}</strong>
-          </span>
-        </a>
+
+        <div class="store-hero__art">
+          <img src="assets/photos/campaign-lineup.webp"
+            alt="Fernvow moisturizer, cleanser and toner on a coral stone shelf"
+            width="990" height="660" fetchpriority="high" />
+        </div>
+
+        <div class="store-hero__bar">
+          <span class="store-hero__steps">Cleanse <span aria-hidden="true">/</span> Tone <span aria-hidden="true">/</span> Moisturize</span>
+          <a href="#collection" class="btn store-hero__shop" data-action="scroll-collection">
+            Shop the collection ${iconSvg('icon-chevron-down', 'icon--sm')}
+          </a>
+          <a href="#/routine" class="store-hero__routine">
+            See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}
+          </a>
+        </div>
+
+        ${renderHeroFeature(foam, 'start')}
+        ${renderHeroFeature(duo, 'duo')}
       </div>
     </section>
 
