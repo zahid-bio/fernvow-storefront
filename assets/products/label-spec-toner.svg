@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-label="Fernvow Hydrating Toner Packaging and Label Specification">
+  <rect width="960" height="540" fill="#ECE8DF"/>
+
+  <!-- Top Architectural Spec Header -->
+  <text x="48" y="36" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="2.2" fill="#181B17">FERNVOW PACKAGING &amp; LABEL SPEC · SKU A5805</text>
+  <text x="912" y="36" text-anchor="end" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="600" letter-spacing="1.8" fill="#3E4F3D">PREVIEW CONCEPT — PENDING SELFNAMED PRINT DIELINE</text>
+  <line x1="48" y1="48" x2="912" y2="48" stroke="#181B17" stroke-opacity="0.16" stroke-width="1"/>
+
+  <!-- Flat Label Sheet Background (Front PDP + Back Info Panel) -->
+  <rect x="48" y="72" width="864" height="412" fill="#FAF8F4" stroke="#181B17" stroke-opacity="0.18" stroke-width="1"/>
+    <g stroke="#181B17" stroke-opacity="0.32" stroke-width="0.8">
+      <line x1="38" y1="72" x2="45" y2="72"/><line x1="48" y1="62" x2="48" y2="69"/>
+      <line x1="915" y1="72" x2="922" y2="72"/><line x1="912" y1="62" x2="912" y2="69"/>
+      <line x1="38" y1="484" x2="45" y2="484"/><line x1="48" y1="487" x2="48" y2="494"/>
+      <line x1="915" y1="484" x2="922" y2="484"/><line x1="912" y1="487" x2="912" y2="494"/>
+    </g>
+
+  <!-- Center Panel Divider (Front PDP 48..422 | Back Info 422..912) -->
+  <line x1="422" y1="72" x2="422" y2="484" stroke="#181B17" stroke-opacity="0.20" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="235" y="64" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.5" letter-spacing="1.8" fill="#595D56">FRONT PDP PANEL (PRINCIPAL DISPLAY)</text>
+  <text x="667" y="64" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.5" letter-spacing="1.8" fill="#595D56">BACK INFORMATION PANEL (INCI · DIRECTIONS · COMPLIANCE)</text>
+
+  <!-- ==================== FRONT PDP PANEL ==================== -->
+  <g>
+    <!-- Pure Vector Emblem + Wordmark -->
+    <g transform="translate(215, 102) scale(0.625)">
+  <path d="M 55.64 28.83 A 24.00 24.00 0 1 1 33.67 9.06" fill="none" stroke="#3E4F3D" stroke-width="1.60" stroke-linecap="round"/>
+  <circle cx="54.09" cy="23.62" r="1.40" fill="#3E4F3D"/>
+  <path d="M 27.3 56.4 C 28.0 46.2, 30.2 34.4, 34.8 24.0 C 37.5 17.9, 40.8 13.6, 44.3 10.6 C 44.7 10.3, 45.1 10.6, 44.7 11.1 C 41.4 14.4, 38.4 18.8, 35.9 24.6 C 31.6 34.7, 29.5 46.4, 28.9 56.4 C 28.8 56.8, 27.3 56.8, 27.3 56.4 Z" fill="#3E4F3D"/>
+  <path d="M 28.8 49.0 C 24.5 48.2, 19.6 46.2, 16.5 42.6 C 20.6 43.3, 25.0 45.2, 29.0 47.4 Z" fill="#3E4F3D"/>
+  <path d="M 29.8 42.6 C 24.6 41.5, 18.8 38.7, 15.2 34.4 C 20.2 35.4, 25.5 38.0, 30.2 41.0 Z" fill="#3E4F3D"/>
+  <path d="M 31.4 36.2 C 26.0 34.9, 20.5 31.8, 17.3 27.4 C 22.3 28.7, 27.4 31.5, 31.8 34.6 Z" fill="#3E4F3D"/>
+  <path d="M 33.3 30.2 C 28.4 28.8, 23.6 25.9, 21.0 21.8 C 25.4 23.2, 29.6 25.9, 33.8 28.7 Z" fill="#3E4F3D"/>
+  <path d="M 35.6 24.5 C 31.4 23.0, 27.5 20.3, 25.4 16.8 C 29.0 18.2, 32.6 20.7, 36.1 23.2 Z" fill="#3E4F3D"/>
+  <path d="M 38.3 19.3 C 35.1 17.9, 32.2 15.6, 30.6 12.7 C 33.4 14.0, 36.2 16.1, 38.8 18.2 Z" fill="#3E4F3D"/>
+  <path d="M 41.2 14.8 C 39.0 13.7, 37.2 12.1, 36.2 10.1 C 38.1 11.1, 39.9 12.6, 41.6 14.0 Z" fill="#3E4F3D"/>
+  <path d="M 29.6 45.8 C 34.4 45.4, 39.6 43.6, 43.6 40.3 C 39.3 40.7, 34.3 42.2, 29.8 44.3 Z" fill="#3E4F3D"/>
+  <path d="M 30.8 39.4 C 36.4 38.8, 42.2 36.6, 46.4 32.8 C 41.6 33.4, 35.9 35.2, 31.2 37.8 Z" fill="#3E4F3D"/>
+  <path d="M 32.6 33.1 C 38.0 32.3, 43.3 29.9, 47.0 26.2 C 42.4 27.0, 37.2 29.0, 33.0 31.6 Z" fill="#3E4F3D"/>
+  <path d="M 34.7 27.1 C 39.4 26.3, 44.0 24.0, 47.0 20.6 C 42.8 21.5, 38.5 23.4, 35.1 25.7 Z" fill="#3E4F3D"/>
+  <path d="M 37.1 21.6 C 41.0 20.7, 44.4 18.7, 46.7 15.8 C 43.4 16.8, 40.0 18.6, 37.5 20.4 Z" fill="#3E4F3D"/>
+  <path d="M 39.7 16.7 C 42.6 15.8, 45.0 14.2, 46.5 12.0 C 44.0 12.9, 41.6 14.4, 40.0 15.7 Z" fill="#3E4F3D"/>
+    </g>
+    <g transform="translate(154, 146) scale(0.45)">
+  <path transform="translate(60.2, 0)" d="M 3.3 54.0 L 14.3 54.0 L 14.3 52.85 C 12.1 52.85, 11.0 51.4, 11.0 49.0 L 11.0 30.20 L 16.8 30.20 L 16.8 29.0 L 11.0 29.0 L 11.0 21.5 C 11.0 16.2, 13.0 13.3, 15.8 13.3 C 16.9 13.3, 17.6 13.7, 18.0 14.2 C 17.1 14.5, 16.5 15.4, 16.5 16.5 C 16.5 17.9, 17.6 19.0, 19.0 19.0 C 20.5 19.0, 21.6 17.8, 21.6 16.1 C 21.6 13.5, 19.2 11.8, 15.8 11.8 C 10.6 11.8, 6.5 15.8, 6.5 22.8 L 6.5 29.0 L 2.2 29.0 L 2.2 30.20 L 6.5 30.20 L 6.5 49.0 C 6.5 51.4, 5.4 52.85, 3.3 52.85 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(89.2, 0)" d="M 13.8 28.5 C 6.4 28.5, 1.0 34.0, 1.0 41.6 C 1.0 49.3, 6.3 54.6, 14.2 54.6 C 19.4 54.6, 23.1 51.9, 24.6 47.6 L 23.5 47.0 C 21.8 50.4, 18.8 52.3, 15.2 52.3 C 9.3 52.3, 5.8 47.4, 5.7 40.6 L 24.7 40.6 C 24.9 33.4, 20.3 28.5, 13.8 28.5 Z M 5.8 39.35 C 6.3 33.5, 9.4 29.85, 13.7 29.85 C 17.7 29.85, 20.1 33.2, 20.2 39.35 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(124.2, 0)" d="M 1.3 54.0 L 12.4 54.0 L 12.4 52.85 C 10.2 52.85, 9.0 51.4, 9.0 49.0 L 9.0 36.2 C 10.5 32.5, 13.2 30.3, 15.8 30.3 C 16.7 30.3, 17.3 30.6, 17.7 31.1 C 16.8 31.4, 16.2 32.3, 16.2 33.4 C 16.2 34.8, 17.3 35.9, 18.8 35.9 C 20.4 35.9, 21.5 34.6, 21.5 32.8 C 21.5 30.3, 19.3 28.5, 16.4 28.5 C 13.1 28.5, 10.4 30.8, 9.0 34.4 L 9.0 29.0 L 8.0 29.0 C 5.9 29.6, 3.6 30.2, 1.5 30.5 L 1.5 31.6 C 3.6 31.7, 4.5 32.6, 4.5 34.8 L 4.5 49.0 C 4.5 51.4, 3.4 52.85, 1.3 52.85 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(153.2, 0)" d="M 1.3 54.0 L 12.2 54.0 L 12.2 52.85 C 10.1 52.85, 9.0 51.4, 9.0 49.0 L 9.0 36.2 C 10.8 32.5, 13.8 30.5, 16.5 30.5 C 18.8 30.5, 20.0 32.1, 20.0 35.5 L 20.0 49.0 C 20.0 51.4, 18.9 52.85, 16.8 52.85 L 16.8 54.0 L 27.7 54.0 L 27.7 52.85 C 25.6 52.85, 24.5 51.4, 24.5 49.0 L 24.5 35.4 C 24.5 30.8, 21.6 28.5, 17.5 28.5 C 14.0 28.5, 11.0 30.4, 9.0 34.0 L 9.0 29.0 L 8.0 29.0 C 5.9 29.6, 3.6 30.2, 1.5 30.5 L 1.5 31.6 C 3.6 31.7, 4.5 32.6, 4.5 34.8 L 4.5 49.0 C 4.5 51.4, 3.4 52.85, 1.3 52.85 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(190.2, 0)" d="M 0.8 29.0 L 11.8 29.0 L 11.8 30.15 C 9.6 30.2, 8.8 31.0, 9.6 33.1 L 15.3 48.2 L 20.8 33.2 C 21.5 31.1, 20.7 30.2, 18.2 30.15 L 18.2 29.0 L 26.2 29.0 L 26.2 30.15 C 24.2 30.25, 23.1 31.2, 22.1 33.8 L 14.3 54.4 L 13.0 54.4 L 4.7 33.4 C 3.8 31.1, 2.7 30.25, 0.8 30.15 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(225.2, 0)" d="M 14.0 28.5 C 6.5 28.5, 1.0 34.1, 1.0 41.55 C 1.0 49.0, 6.5 54.6, 14.0 54.6 C 21.5 54.6, 27.0 49.0, 27.0 41.55 C 27.0 34.1, 21.5 28.5, 14.0 28.5 Z M 14.0 29.85 C 18.8 29.85, 21.9 34.6, 21.9 41.55 C 21.9 48.5, 18.8 53.25, 14.0 53.25 C 9.2 53.25, 6.1 48.5, 6.1 41.55 C 6.1 34.6, 9.2 29.85, 14.0 29.85 Z" fill="#181B17" fill-rule="evenodd"/>
+  <path transform="translate(261.2, 0)" d="M 0.6 29.0 L 10.6 29.0 L 10.6 30.15 C 8.7 30.2, 8.0 30.9, 8.7 32.9 L 13.4 47.7 L 17.8 34.4 L 17.0 32.2 C 16.4 30.7, 15.6 30.2, 14.0 30.15 L 14.0 29.0 L 23.6 29.0 L 23.6 30.15 C 21.8 30.2, 21.2 30.9, 21.9 32.9 L 26.6 47.7 L 31.3 33.1 C 32.0 31.0, 31.2 30.2, 28.9 30.15 L 28.9 29.0 L 36.4 29.0 L 36.4 30.15 C 34.5 30.25, 33.5 31.2, 32.5 34.0 L 25.7 54.4 L 24.4 54.4 L 18.6 36.8 L 12.6 54.4 L 11.3 54.4 L 4.1 33.4 C 3.3 31.1, 2.3 30.25, 0.6 30.15 Z" fill="#181B17" fill-rule="evenodd"/>
+    </g>
+    <line x1="125" y1="190" x2="345" y2="190" stroke="#181B17" stroke-opacity="0.16" stroke-width="0.9"/>
+
+    <text x="235" y="214" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="500" letter-spacing="2.4" fill="#3E4F3D">STEP 02 · TONE</text>
+    <text x="235" y="246" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="#181B17">Hydrating</text>
+    <text x="235" y="274" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="#181B17">Toner</text>
+    <text x="235" y="302" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10.5" letter-spacing="0.4" fill="#595D56">Rose Water · Chamomile · Sodium Hyaluronate</text>
+
+    <!-- Fragrance Accuracy Pill -->
+    <rect x="148" y="324" width="174" height="26" rx="13" fill="none" stroke="#3E4F3D" stroke-opacity="0.45" stroke-width="1"/>
+    <text x="235" y="340.5" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="1.6" fill="#3E4F3D">FRAGRANCE FREE</text>
+
+    <line x1="125" y1="382" x2="345" y2="382" stroke="#181B17" stroke-opacity="0.14" stroke-width="0.9"/>
+    <text x="235" y="408" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="500" letter-spacing="1.2" fill="#181B17">200 mL  /  6.76 fl oz</text>
+    <text x="235" y="427" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.5" letter-spacing="1.0" fill="#595D56">pH 4.70–5.10 · No Added Fragrance</text>
+  </g>
+
+  <!-- ==================== BACK INFORMATION PANEL ==================== -->
+  <g>
+    <text x="502" y="96" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="1.8" fill="#3E4F3D">HOW TO USE / DIRECTIONS</text>
+    <line x1="502" y1="103" x2="882" y2="103" stroke="#181B17" stroke-opacity="0.14" stroke-width="0.8"/>
+    <text x="502" y="119" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.8" font-style="italic" fill="#595D56">For external use only. Avoid direct contact with eyes.</text>
+    <text x="502" y="136" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.3" fill="#181B17">1. Apply to clean skin after cleansing.</text>
+    <text x="502" y="150.6" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.3" fill="#181B17">2. Splash into hands and press gently over face, or sweep with a</text>
+    <text x="513" y="163.2" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.3" fill="#181B17">pad.</text>
+    <text x="502" y="177.79999999999998" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.3" fill="#181B17">3. Follow with Daily Face Moisturizer morning and evening.</text>
+
+    <text x="502" y="214" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="1.8" fill="#3E4F3D">INGREDIENTS (INCI)</text>
+    <line x1="502" y1="221" x2="882" y2="221" stroke="#181B17" stroke-opacity="0.14" stroke-width="0.8"/>
+    <text x="502" y="238" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9.1" fill="#181B17">
+      <tspan x="502" dy="0">Aqua/Water, Rosa Damascena (Rose) Flower Water*, Glycerin**, Sodium</tspan>
+        <tspan x="502" dy="12.2">PCA, Benzyl Alcohol, Chamomilla Recutita (Chamomile) Flower</tspan>
+        <tspan x="502" dy="12.2">Extract*, Fragaria Ananassa (Strawberry) Fruit Extract*, Sodium</tspan>
+        <tspan x="502" dy="12.2">Benzoate, Potassium Sorbate, Sodium Hyaluronate, Lactic Acid, Citric</tspan>
+        <tspan x="502" dy="12.2">Acid</tspan>
+    </text>
+    <text x="502" y="302.0" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.0" font-style="italic" fill="#595D56">*Ingredients from organic farming. **Made using organic ingredients.</text>
+
+    <!-- Recycling & Resin Codes -->
+    <line x1="502" y1="366" x2="882" y2="366" stroke="#181B17" stroke-opacity="0.14" stroke-width="0.8"/>
+    <g transform="translate(502, 380)">
+      <path d="M 14 2 L 25 20 L 3 20 Z" fill="none" stroke="#181B17" stroke-width="1.2" stroke-linejoin="round"/>
+      <text x="14" y="16.5" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7.5" font-weight="600" fill="#181B17">1</text>
+      <text x="14" y="30" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="600" letter-spacing="0.6" fill="#181B17">PET</text>
+      <text x="34" y="13" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.2" fill="#595D56">Bottle: PET #1 · Separate PP #5 disc-top cap before recycling.</text>
+    </g>
+    <g transform="translate(802, 380)">
+      <path d="M 14 2 L 25 20 L 3 20 Z" fill="none" stroke="#181B17" stroke-width="1.2" stroke-linejoin="round"/>
+      <text x="14" y="16.5" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7.5" font-weight="600" fill="#181B17">5</text>
+      <text x="14" y="30" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="600" letter-spacing="0.6" fill="#181B17">PP</text>
+      <text x="34" y="13" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.2" fill="#595D56">Disc-Top Cap</text>
+    </g>
+
+    <!-- US MoCRA Responsible Person & Compliance Block -->
+    <rect x="502" y="428" width="380" height="42" rx="3" fill="#F6F4EF" stroke="#181B17" stroke-opacity="0.22" stroke-width="0.8" stroke-dasharray="3 2"/>
+    <text x="513" y="444" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7.4" font-weight="600" letter-spacing="0.25" fill="#181B17">[PENDING: US MoCRA Responsible Person Name, Address &amp; Adverse Event Contact]</text>
+    <text x="513" y="458" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7.7" fill="#595D56">Batch / Lot &amp; PAO symbol placed per final Selfnamed print dieline. No unapproved claims.</text>
+  </g>
+
+  <!-- Bottom Margin Spec Legend -->
+  <text x="48" y="516" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.8" letter-spacing="0.8" fill="#595D56">BLEED / CROP REFERENCE ONLY · NOT FOR PRODUCTION PRINT UNTIL DIELINE &amp; MoCRA FIELDS ARE CONFIRMED</text>
+  <text x="912" y="516" text-anchor="end" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8.8" letter-spacing="1.0" fill="#181B17">fernvow.com</text>
+</svg>

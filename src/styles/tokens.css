@@ -1,0 +1,85 @@
+:root {
+  /* Surfaces — Sonnette Sunlit Alabaster + Crisp Paper Studio + Warm Sand */
+  --bg-linen: #F6F4EF;
+  --bg-paper: #FFFFFF;
+  --bg-sand: #EDE9E0;
+  --bg-sand-soft: #F2EFE8;
+  --bg-oat: #EDE9E0;
+  --bg-oat-soft: #F2EFE8;
+
+  /* Ink */
+  --ink: #181A17;
+  --ink-secondary: #5E605A;
+  --ink-muted: #84867E;
+  --ink-on-dark: #F6F4EF;
+  --ink-on-dark-muted: rgba(246, 244, 239, 0.72);
+
+  /* Accent — Homedine / Botanical Deep Woodland Fern */
+  --fern: #1D3829;
+  --fern-hover: #14271D;
+  --fern-tint: rgba(29, 56, 41, 0.08);
+  --fern-tint-strong: rgba(29, 56, 41, 0.14);
+
+  /* Subtle Semantic Tints */
+  --disclosure-free-bg: #EBF1EC;
+  --disclosure-free-ink: #1D3829;
+  --disclosure-free-border: rgba(29, 56, 41, 0.18);
+
+  --disclosure-parfum-bg: #F4EFE6;
+  --disclosure-parfum-ink: #5A462B;
+  --disclosure-parfum-border: rgba(90, 70, 43, 0.20);
+
+  /* Hairlines & Ambient Shadows */
+  --hairline: rgba(24, 26, 23, 0.10);
+  --hairline-strong: rgba(24, 26, 23, 0.24);
+  --shadow-soft: 0 22px 54px -26px rgba(24, 26, 23, 0.16);
+  --shadow-float: 0 20px 48px -18px rgba(24, 26, 23, 0.22);
+  --shadow-drawer: -18px 0 56px rgba(24, 26, 23, 0.14);
+  --shadow-modal: 0 32px 84px -22px rgba(24, 26, 23, 0.24);
+
+  /* Typography — Instrument Serif + Cormorant Garamond + DM Sans + IBM Plex Mono */
+  --font-display: 'Instrument Serif', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Editorial Type Scale */
+  --text-hero-statement: clamp(2.6rem, 5.6vw, 5.1rem);
+  --text-h1: clamp(2.35rem, 4.4vw, 3.85rem);
+  --text-h2: clamp(1.9rem, 3.4vw, 3.1rem);
+  --text-h3: clamp(1.3rem, 2vw, 1.75rem);
+  --text-lead: clamp(0.95rem, 1.15vw, 1.0625rem);
+  --text-body: 0.9375rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-mono: 0.71rem;
+
+  /* Layout & Spacing */
+  --container-max: 1360px;
+  --gutter: clamp(1.1rem, 3.2vw, 2.75rem);
+  --section-space: clamp(4.2rem, 7.5vw, 7.25rem);
+  --header-height: 64px;
+
+  /* Radii */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Motion Curves — 1:1 Sonnette Choreography */
+  --ease-sonnette: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-float: cubic-bezier(0.37, 0, 0.63, 1);
+  --ease-calm: var(--ease-sonnette);
+  --duration-fast: 180ms;
+  --duration-base: 360ms;
+  --duration-slow: 720ms;
+
+  /* Layering */
+  --z-header: 50;
+  --z-backdrop: 70;
+  --z-drawer: 80;
+  --z-modal: 90;
+  --z-toast: 100;
+}
