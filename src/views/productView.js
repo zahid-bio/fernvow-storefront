@@ -1,4 +1,4 @@
-import { PRODUCTS, formatMoney, getProductBySlug } from '../data/catalog.js';
+import { PRODUCTS, formatMoney, getProductBySlug, getProductScentLabel } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from '../components/header.js';
 import { renderProductCard } from './homeView.js';
 
@@ -93,22 +93,17 @@ function renderProductStory(product, qty, detailPhoto) {
         <img src="${escapeHtml(detailPhoto.src)}" alt="${escapeHtml(detailPhoto.alt)}"
           width="900" height="675" loading="lazy" decoding="async" />
         <div class="product-story__copy">
-          <h2 class="store-heading">A closer look</h2>
-          <p>${escapeHtml(product.packaging.bottle)}. ${escapeHtml(product.packaging.pumpOrCap)}.</p>
-          <button type="button" class="btn btn--outline" data-action="open-product-ingredients"
-            aria-controls="pdp-ingredients">
-            See full ingredients ${iconSvg('icon-arrow-up-right', 'icon--sm')}
-          </button>
+          <p class="section-label">${escapeHtml(name)}</p>
+          <h2 class="store-heading">${escapeHtml(product.benefit)}</h2>
+          <p>${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}</p>
+          ${product.isBundle ? `<p class="product-deal">Save ${formatMoney(product.savingsAmount)} compared with buying both separately.</p>` : ''}
+          <div class="product-story__purchase">
+            ${renderPurchaseButton(product, qty)}
+            <span class="product-story__quantity" data-pdp-selected-qty${qty === 1 ? ' hidden' : ''}>${qty} selected</span>
+          </div>
         </div>
       </div>
 
-      <div class="product-story__purchase">
-        <div>
-          <h2>${escapeHtml(name)}</h2>
-          <p>${escapeHtml(product.benefit)}</p>
-        </div>
-        ${renderPurchaseButton(product, qty)}
-      </div>
     </section>
   `;
 }
@@ -126,10 +121,6 @@ export function renderProductView({ slug, qty = 1 }) {
 
   const mediaOptions = getPdpMediaOptions(product);
   const companions = PRODUCTS.filter((item) => item.slug !== product.slug);
-  const scent = {
-    'contains-fragrance': 'Light floral scent',
-    'fragrance-free': 'Fragrance-free',
-  }[product.fragranceStatus] || 'Cleanser has a light floral scent';
 
   return `
     <div class="container product-page">
@@ -155,7 +146,7 @@ export function renderProductView({ slug, qty = 1 }) {
         <section class="product-page__info" aria-labelledby="product-title">
           <h1 id="product-title">${escapeHtml(product.name)}</h1>
           <p class="product-page__summary">${escapeHtml(product.subtitle)}</p>
-          <p class="product-page__facts">${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(scent)}</p>
+          <p class="product-page__facts">${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}</p>
           <div class="pdp-price-bar">
             <strong class="pdp-price">${formatMoney(product.price)}</strong>
             ${product.compareAtPrice ? `<del>${formatMoney(product.compareAtPrice)}</del>` : ''}
@@ -172,6 +163,11 @@ export function renderProductView({ slug, qty = 1 }) {
             </div>
             ${renderPurchaseButton(product, qty, true)}
           </div>
+
+          <nav class="product-order-links" aria-label="Order information">
+            <a href="#/policies/shipping">Shipping and delivery</a>
+            <a href="#/policies/returns">Returns</a>
+          </nav>
 
           <dl class="product-quick-facts" aria-label="Formula at a glance">
             <div><dt>Texture</dt><dd>${escapeHtml(product.texture)}</dd></div>
@@ -196,6 +192,8 @@ export function renderProductView({ slug, qty = 1 }) {
               <dl class="product-specs">
                 <div><dt>pH</dt><dd>${escapeHtml(product.phRange)}</dd></div>
                 <div><dt>Fragrance</dt><dd>${escapeHtml(product.fragranceNote)}</dd></div>
+                <div><dt>Bottle</dt><dd>${escapeHtml(product.packaging.bottle)}</dd></div>
+                <div><dt>Closure</dt><dd>${escapeHtml(product.packaging.pumpOrCap)}</dd></div>
               </dl>
               <p>${escapeHtml(product.packaging.recycling)}</p>
             `)}

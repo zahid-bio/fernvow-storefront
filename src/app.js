@@ -172,6 +172,7 @@ function renderActiveViewHtml() {
     case 'policies':
       return renderPoliciesView({
         section: state.route.section,
+        preview: STOREFRONT_CONFIG.mode === 'preview',
       });
     case 'home':
     default:
@@ -425,15 +426,6 @@ document.addEventListener('click', (event) => {
       selectCollection(actionEl.dataset.category);
       break;
     }
-    case 'open-product-ingredients': {
-      const ingredients = document.getElementById('pdp-ingredients');
-      if (!ingredients) break;
-      ingredients.open = true;
-      const summary = ingredients.querySelector('summary');
-      summary.focus({ preventScroll: true });
-      summary.scrollIntoView({ block: 'center' });
-      break;
-    }
     case 'set-pdp-media': {
       const product = getProductBySlug(state.route.slug);
       if (!product) break;
@@ -465,6 +457,9 @@ document.addEventListener('click', (event) => {
         button.dataset.qty = String(nextQty);
         button.querySelector('[data-pdp-add-text]').textContent = `Add to bag — ${formatMoney(price * nextQty)}`;
       }
+      const selectedQty = document.querySelector('[data-pdp-selected-qty]');
+      selectedQty.textContent = `${nextQty} selected`;
+      selectedQty.hidden = nextQty === 1;
       break;
     }
     case 'add-to-cart': {

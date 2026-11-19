@@ -9,7 +9,7 @@ const POLICY_TABS = [
   { id: 'contact', label: 'Contact & Care' },
 ];
 
-export function renderPoliciesView({ section = 'shipping' }) {
+export function renderPoliciesView({ section = 'shipping', preview = false }) {
   const activeId = POLICY_TABS.some((tab) => tab.id === section) ? section : 'shipping';
   const activePolicy = POLICIES[activeId] || POLICIES.shipping;
 
@@ -18,6 +18,9 @@ export function renderPoliciesView({ section = 'shipping' }) {
       <div class="container">
         <span class="eyebrow">Care &amp; Store Policies</span>
         <h1 class="page-hero__title">${escapeHtml(activePolicy.title)}</h1>
+        ${preview && ['shipping', 'returns'].includes(activeId) ? `
+          <p class="policy-preview-note">Draft policy for the store preview. Final terms will be available when orders open.</p>
+        ` : ''}
         <p class="lead-copy page-hero__lead">
           ${escapeHtml(activePolicy.summary)}
         </p>

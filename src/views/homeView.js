@@ -1,4 +1,4 @@
-import { PRODUCTS, formatMoney, getProductBySlug } from '../data/catalog.js';
+import { PRODUCTS, formatMoney, getProductBySlug, getProductScentLabel } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from '../components/header.js';
 
 const TICKER_ITEMS = [
@@ -24,7 +24,7 @@ function renderCollectionExplorer(activeFilter, sortBy) {
             <picture class="cat-stage__bg ${id === activeFilter ? 'is-active' : ''}" data-cat="${id}">
               <source media="(max-width: 640px)" srcset="assets/photos/ticker-${image}-mobile.webp" width="720" height="720" />
               <img src="assets/photos/ticker-${image}-wide.webp" alt="" width="1600" height="640"
-                loading="lazy" decoding="async" />
+                loading="lazy" decoding="async"${id === activeFilter ? '' : ' fetchpriority="low"'} />
             </picture>
           `).join('')}
         </div>
@@ -85,6 +85,9 @@ export function renderProductCard(product) {
       <div class="shop-card__info">
         <h3><a href="#/product/${slug}">${name}</a></h3>
         <p>${escapeHtml(product.benefit)}</p>
+        <p class="shop-card__facts">
+          ${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}
+        </p>
         <div class="shop-card__price">
           <strong>${formatMoney(product.price)}</strong>
           ${product.compareAtPrice ? `<del>${formatMoney(product.compareAtPrice)}</del>` : ''}

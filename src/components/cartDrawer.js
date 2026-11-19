@@ -57,14 +57,16 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
           <div class="cart-summary-row cart-summary-row--total">
             <span>Subtotal</span><strong>${formatMoney(cart.subtotal)}</strong>
           </div>
-          <p class="cart-drawer__note">Shipping and tax are calculated at checkout.</p>
+          <p class="cart-drawer__note">${preview
+            ? 'Store preview. Orders are currently closed.'
+            : 'Shipping and tax are calculated at checkout.'}</p>
           <button type="button" class="btn btn--fern btn--full" data-action="prepare-checkout"
             aria-disabled="${String(isCheckingOut)}">
-            ${isCheckingOut ? 'Opening checkout…' : 'Checkout'}
+            ${isCheckingOut ? 'Opening checkout…' : preview ? 'Preview checkout' : 'Continue to checkout'}
             ${isCheckingOut ? '' : iconSvg('icon-arrow-right', 'icon--sm')}
           </button>
-          ${preview ? '<p class="cart-drawer__note">Store preview. Orders are currently closed.</p>' : ''}
           ${checkoutMessage ? `<p class="cart-checkout-status" role="status">${escapeHtml(checkoutMessage)}</p>` : ''}
+          <button type="button" class="cart-drawer__continue" data-action="close-cart">Keep shopping</button>
         </div>
       ` : ''}
     </aside>

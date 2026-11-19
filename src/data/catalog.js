@@ -29,6 +29,14 @@ export function formatMoney(amount, currency = 'USD', locale = 'en-US') {
   }).format(safeValue);
 }
 
+export function getProductScentLabel(product) {
+  return {
+    'contains-fragrance': 'Light floral scent',
+    'fragrance-free': 'Fragrance-free',
+    'mixed-duo': 'Cleanser has a light floral scent',
+  }[product.fragranceStatus] || product.fragranceBadge;
+}
+
 const DAILY_CLEANSING_FOAM_INCI =
   'Aqua/Water, Cocamidopropyl Betaine, Rosa Damascena (Rose) Flower Water*, Glycerin, Sucrose Cocoate, Sodium Levulinate, Lactic Acid, Sodium Anisate, Calendula Officinalis (Calendula) Flower Extract*, Chamomilla Recutita (Chamomile) Flower Extract*, Parfum/Fragrance, Benzyl Alcohol, Sodium Benzoate, Potassium Sorbate';
 
