@@ -14,11 +14,6 @@ export function iconSvg(id, extraClass = '') {
 
 export const NAV_ITEMS = [
   { label: 'Shop', hash: '#/', match: (route) => route.name === 'home' },
-  {
-    label: 'The Duo',
-    hash: '#/product/the-daily-duo',
-    match: (route) => route.name === 'product' && route.slug === 'the-daily-duo',
-  },
   { label: 'Routine', hash: '#/routine', match: (route) => route.name === 'routine' },
   {
     label: 'About',
