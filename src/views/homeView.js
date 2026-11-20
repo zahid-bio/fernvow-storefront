@@ -93,7 +93,7 @@ export function renderProductCard(product) {
   const slug = escapeHtml(product.slug);
   const name = escapeHtml(product.name);
   return `
-    <article class="shop-card">
+    <article class="shop-card" data-formula="${escapeHtml(product.category)}">
       <a href="#/product/${slug}" class="shop-card__photo" tabindex="-1" aria-hidden="true">
         <img src="${escapeHtml(product.images.primary)}" alt="" loading="lazy" width="960" height="1200" />
       </a>

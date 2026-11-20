@@ -30,11 +30,12 @@ export function getPdpMediaOptions(product) {
         bundle: 'The pink cleanser and yellow moisturizer bottles on a sunlit stone ledge',
       }[product.category],
     },
+    { id: 'routine', label: 'Routine', src: product.images.editorialImage, alt: product.images.editorialAlt },
   ];
 }
 
 export function renderPdpMedia(media) {
-  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" fetchpriority="high" />`;
+  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media="${media.id}" fetchpriority="high" />`;
 }
 
 function renderIngredients(product) {
@@ -123,7 +124,7 @@ export function renderProductView({ slug, qty = 1 }) {
   const companions = PRODUCTS.filter((item) => item.slug !== product.slug);
 
   return `
-    <div class="container product-page">
+    <div class="container product-page" data-formula="${escapeHtml(product.category)}">
       <nav class="product-breadcrumb" aria-label="Breadcrumb">
         <a href="#/">Shop</a>
         <span aria-hidden="true">/</span>
