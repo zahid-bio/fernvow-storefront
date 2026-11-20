@@ -412,12 +412,30 @@ dd {
 }
 
 .initial-loading {
-  min-height: 70vh;
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-toast) + 1);
   display: grid;
   place-items: center;
+  background: var(--bg-linen);
   font-family: var(--font-display);
-  font-size: 2.2rem;
-  color: var(--ink-secondary);
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  letter-spacing: -.025em;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.initial-loading.is-ready {
+  animation: startup-reveal 140ms ease 750ms forwards;
+}
+
+.app-shell:focus-within ~ .initial-loading,
+.skip-link:focus ~ .initial-loading {
+  visibility: hidden;
+}
+
+@keyframes startup-reveal {
+  to { opacity: 0; visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {

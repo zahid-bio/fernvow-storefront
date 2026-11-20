@@ -395,11 +395,13 @@ async function checkPaymentStatus() {
   document.getElementById('main-content').focus({ preventScroll: true });
 }
 
-function scrollToSection(id) {
-  const section = document.getElementById(id);
+function scrollToCollection({ focusTab = false, behavior = 'instant' } = {}) {
+  const section = document.getElementById('collection');
   if (!section) return;
-  section.scrollIntoView();
-  section.querySelector('.cat-ticker__btn[aria-selected="true"]')?.focus({ preventScroll: true });
+  if (focusTab) {
+    section.querySelector('.cat-ticker__btn[aria-selected="true"]')?.focus({ preventScroll: true });
+  }
+  section.scrollIntoView({ block: 'start', behavior });
 }
 
 document.addEventListener('click', (event) => {
@@ -466,7 +468,7 @@ document.addEventListener('click', (event) => {
     }
     case 'scroll-collection': {
       event.preventDefault();
-      scrollToSection('collection');
+      scrollToCollection({ focusTab: true, behavior: 'auto' });
       break;
     }
     case 'set-category': {
@@ -618,7 +620,8 @@ window.addEventListener('hashchange', () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   renderRoute();
-  if (routeChanged) document.getElementById('main-content').focus({ preventScroll: true });
+  if (window.location.hash === '#collection') scrollToCollection();
+  else if (routeChanged) document.getElementById('main-content').focus({ preventScroll: true });
   if (routeChanged) checkPaymentStatus();
 });
 
@@ -631,6 +634,14 @@ commerce.subscribe((nextCart) => {
 });
 
 renderRoute();
+const storeIntro = document.getElementById('store-intro');
+const opensAtCollection = window.location.hash === '#collection';
+if (state.route.name === 'checkout' || opensAtCollection) {
+  storeIntro?.remove();
+} else {
+  storeIntro?.classList.add('is-ready');
+}
+if (opensAtCollection) scrollToCollection();
 checkPaymentStatus();
 getCheckoutSettings().then(({ enabled, shippingCents, freeShippingMinimumCents }) => {
   if (enabled !== true) return;
