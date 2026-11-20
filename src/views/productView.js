@@ -27,7 +27,7 @@ export function getPdpMediaOptions(product) {
         cleanse: 'Close-up of airy cleansing foam in a ceramic dish',
         tone: 'Clear water rippling in a blush glass dish',
         moisturize: 'An ivory moisturizer swatch on a coral tile',
-        bundle: 'Two ivory bottles side by side on a coral ledge',
+        bundle: 'The pink cleanser and yellow moisturizer bottles on a sunlit stone ledge',
       }[product.category],
     },
   ];

@@ -1,6 +1,16 @@
 # Fernvow product media
 
-All four product meshes came from [Microsoft TRELLIS.2](https://github.com/microsoft/TRELLIS.2) using [trellis.cpp v0.8.1](https://github.com/pwilkin/trellis.cpp/releases/tag/v0.8.1) and the [Q4 GGUF weights](https://huggingface.co/ilintar/trellis2-gguf/tree/main/q4). Blender applied Fernvow’s label artwork and separate paper, bottle, and cap roughness maps. The model files and Cycles ray-traced stills are archived production assets. Product pages use the photographs below.
+## Botanical packaging and current photography
+
+The bottle wraps and moisturizer carton dieline in `assets/packaging` match the designs saved in Selfnamed. The six front panels and proof sheet show the whole design family. Selfnamed offers a printable carton for the moisturizer and a bottle label for each formula. The cleanser and toner carton fronts are concept artwork.
+
+The three individual storefront packshots are exported from Selfnamed. The Daily Duo, homepage cutout, routine photo, and collection images use built-in ImageGen with the Selfnamed packshots as references. The desktop collection panels are 1600 × 640 and the mobile panels are 720 × 720.
+
+The packaging prompts asked ImageGen to flatten the approved reference into six print panels, preserve the high-contrast wordmark and detailed ferns and flowers, and keep each formula's color and exact label text. The bottle artwork was color-corrected to neutral white and fitted to each supplier wrap. The photo prompts asked for the exact white bottles, closures, and artwork in sunlit stone and plaster settings, with compact, centered product groups for the collection crops and a transparent background for the homepage cutout.
+
+## Archive
+
+All four product meshes came from [Microsoft TRELLIS.2](https://github.com/microsoft/TRELLIS.2) using [trellis.cpp v0.8.1](https://github.com/pwilkin/trellis.cpp/releases/tag/v0.8.1) and the [Q4 GGUF weights](https://huggingface.co/ilintar/trellis2-gguf/tree/main/q4). Blender applied Fernvow’s label artwork and separate paper, bottle, and cap roughness maps. The model files and Cycles ray-traced stills are archived production assets.
 
 ## Campaign photography
 
