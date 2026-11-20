@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
+  <!-- Google Tag Manager -->
+  <script>
+    (() => {
+      // Checkout returns can carry order and Stripe session identifiers in the URL.
+      const { search, hash } = window.location;
+      const params = new URLSearchParams(search);
+      if (params.has('order') || params.has('session_id') || /^#\/checkout(?:\/|$)/.test(hash)) return;
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function gtag() { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+
+      const tag = document.createElement('script');
+      tag.async = true;
+      tag.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-5VF96GZH';
+      document.head.append(tag);
+    })();
+  </script>
+  <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fernvow — Calm Daily Skincare</title>
