@@ -5,7 +5,7 @@ Fernvow uses Stripe-hosted Checkout for cards and eligible wallets. The server b
 ## Activate Fernvow’s Stripe account
 
 1. Select Fernvow in the [Stripe Dashboard](https://dashboard.stripe.com/) and choose **Activate payments**. Complete Stripe’s business verification, payout bank information and public business details. [Stripe account setup](https://docs.stripe.com/get-started/account/set-up)
-2. Fernvow’s live configuration has **Cards**, **Apple Pay**, **Google Pay**, **Link**, **Cash App Pay**, and **Amazon Pay** enabled. Checkout selects from eligible methods automatically. Stripe handles Apple Pay domain validation for its hosted page. [Stripe payment methods](https://docs.stripe.com/payments/payment-methods), [Apple Pay](https://docs.stripe.com/apple-pay), [Google Pay](https://docs.stripe.com/google-pay)
+2. Fernvow’s live configuration has **Cards**, **Apple Pay**, **Google Pay**, **Link**, **Cash App Pay**, **Amazon Pay**, and **Klarna** enabled. Checkout selects from eligible methods automatically. Stripe handles Apple Pay domain validation for its hosted page. [Stripe payment methods](https://docs.stripe.com/payments/payment-methods), [Apple Pay](https://docs.stripe.com/apple-pay), [Google Pay](https://docs.stripe.com/google-pay)
 3. Confirm the US destinations, flat shipping charge and fulfillment process with Selfnamed. Approve the storefront policies accordingly. Configure Stripe Tax with the relevant registrations and the product and shipping tax codes before opening orders. Stripe Checkout calculates tax on the shipping address. [Stripe Tax on Checkout](https://docs.stripe.com/tax/checkout), [Selfnamed custom-platform guidance](https://help.selfnamed.com/en/collections/19078182-other-platforms-custom-apis)
 
 ## Connect the hosted store
@@ -19,6 +19,7 @@ Fernvow uses Stripe-hosted Checkout for cards and eligible wallets. The server b
    | --- | --- |
    | `FERNVOW_PUBLIC_ORIGIN` | The public HTTPS origin, with no route suffix |
    | `FERNVOW_SHIPPING_CENTS` | The approved flat rate in cents, or `0` for free shipping |
+   | `FERNVOW_FREE_SHIPPING_MINIMUM_CENTS` | Optional merchandise subtotal in cents that qualifies for free shipping |
    | `STRIPE_ACCOUNT_ID` | Fernvow’s live merchant account ID from Stripe |
    | `STRIPE_SECRET_KEY` | A live Stripe key. If restricted, allow account reads and Checkout Session writes and reads |
    | `STRIPE_WEBHOOK_SECRET` | The live endpoint’s signing secret |

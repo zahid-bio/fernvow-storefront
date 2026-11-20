@@ -1,13 +1,14 @@
 const pendingCartKey = 'fernvow_checkout_cart';
 let checkoutAttempt;
 
-export async function isCheckoutEnabled() {
+export async function getCheckoutSettings() {
   try {
     const response = await fetch('/api/checkout/methods', { cache: 'no-store' });
-    return response.ok && (await response.json()).enabled === true;
+    if (response.ok) return await response.json();
   } catch {
-    return false;
+    // Checkout stays in preview when the payment configuration is unavailable.
   }
+  return { enabled: false };
 }
 
 async function checkoutRequest(path, body) {

@@ -1,10 +1,20 @@
 import { formatMoney } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from './header.js';
 
-export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, preview }) {
+export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, preview, shipping }) {
   if (!isOpen) return '';
 
   const items = cart?.items || [];
+  const subtotalCents = Math.round((cart?.subtotal || 0) * 100);
+  const freeShippingMinimum = shipping?.freeShippingMinimumCents;
+  const shippingCents = freeShippingMinimum && subtotalCents >= freeShippingMinimum ? 0 : shipping?.shippingCents;
+  let shippingNote = preview ? 'Store preview. Orders are currently closed.' : 'Shipping and tax are shown at checkout.';
+  if (!preview && shipping) {
+    shippingNote = 'Tax calculated at checkout.';
+    if (shippingCents && freeShippingMinimum) {
+      shippingNote += ` Free US shipping on orders of ${formatMoney(freeShippingMinimum / 100)} or more.`;
+    }
+  }
 
   return `
     <div class="drawer-backdrop overlay-backdrop" data-action="close-cart"></div>
@@ -57,9 +67,12 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
           <div class="cart-summary-row cart-summary-row--total">
             <span>Subtotal</span><strong>${formatMoney(cart.subtotal)}</strong>
           </div>
-          <p class="cart-drawer__note">${preview
-            ? 'Store preview. Orders are currently closed.'
-            : 'Shipping and tax are shown at checkout.'}</p>
+          ${!preview && shipping ? `
+            <div class="cart-summary-row">
+              <span>Standard US shipping</span><strong>${shippingCents === 0 ? 'Free' : formatMoney(shippingCents / 100)}</strong>
+            </div>
+          ` : ''}
+          <p class="cart-drawer__note">${shippingNote}</p>
           <button type="button" class="btn btn--fern btn--full" data-action="prepare-checkout"
             aria-disabled="${String(isCheckingOut)}">
             ${isCheckingOut ? 'Opening checkout…' : preview ? 'Preview checkout' : 'Continue to secure checkout'}

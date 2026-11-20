@@ -1,6 +1,6 @@
 import { formatMoney, getProductBySlug } from './data/catalog.js';
 import { createCommerceClient } from './services/commerce.js';
-import { beginCheckout, getCheckoutResult, isCheckoutEnabled, rememberCheckout } from './services/checkout.js';
+import { beginCheckout, getCheckoutResult, getCheckoutSettings, rememberCheckout } from './services/checkout.js';
 import {
   renderHeader,
   renderMobileMenu,
@@ -44,6 +44,7 @@ const state = {
   searchQuery: '',
   checkoutMessage: '',
   checkoutEnabled: false,
+  shipping: null,
   checkoutResult: { status: 'loading' },
 };
 
@@ -152,6 +153,7 @@ function renderOverlays(animateIn = true) {
       isCheckingOut: Boolean(checkoutRequest),
       checkoutMessage: state.checkoutMessage,
       preview: !state.checkoutEnabled,
+      shipping: state.shipping,
     }),
     renderSearchModal({ isOpen: state.isSearchOpen, query: state.searchQuery }),
   ]
@@ -636,9 +638,10 @@ commerce.subscribe((nextCart) => {
 
 renderRoute();
 checkPaymentStatus();
-isCheckoutEnabled().then((enabled) => {
-  if (!enabled) return;
+getCheckoutSettings().then(({ enabled, shippingCents, freeShippingMinimumCents }) => {
+  if (enabled !== true) return;
   state.checkoutEnabled = true;
+  if (Number.isInteger(shippingCents)) state.shipping = { shippingCents, freeShippingMinimumCents };
   if (state.isCartOpen) {
     renderOverlays(false);
     focusElementSoon('#cart-drawer [data-action="close-cart"]');

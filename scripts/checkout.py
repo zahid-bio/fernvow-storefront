@@ -76,11 +76,12 @@ def resolve_cart(body):
 
 
 class Checkout:
-    def __init__(self, origin, *, stripe_key="", stripe_webhook_secret="", shipping=0):
+    def __init__(self, origin, *, stripe_key="", stripe_webhook_secret="", shipping=0, free_shipping_minimum=None):
         self.origin = origin
         self.stripe_key = stripe_key
         self.stripe_webhook_secret = stripe_webhook_secret
         self.shipping = shipping
+        self.free_shipping_minimum = free_shipping_minimum
 
         if not self.stripe_key:
             return
@@ -109,7 +110,14 @@ class Checkout:
         shipping = int(env.get("FERNVOW_SHIPPING_CENTS") or "0")
         if not 0 <= shipping <= 100000:
             raise ValueError("Invalid shipping amount.")
-        checkout = cls(origin, stripe_key=stripe_key, stripe_webhook_secret=webhook_secret, shipping=shipping)
+        minimum = env.get("FERNVOW_FREE_SHIPPING_MINIMUM_CENTS", "").strip()
+        free_shipping_minimum = int(minimum) if minimum else None
+        if free_shipping_minimum is not None and free_shipping_minimum <= 0:
+            raise ValueError("Invalid free shipping minimum.")
+        checkout = cls(
+            origin, stripe_key=stripe_key, stripe_webhook_secret=webhook_secret,
+            shipping=shipping, free_shipping_minimum=free_shipping_minimum,
+        )
         account = checkout.stripe("/account")
         if account.get("id") != env["STRIPE_ACCOUNT_ID"]:
             raise ValueError("The Stripe key belongs to a different merchant account.")
@@ -128,6 +136,9 @@ class Checkout:
         return request_json(STRIPE_URL + path, headers=headers, form=form)
 
     def create_stripe_session(self, reference, quantities, subtotal):
+        shipping = self.shipping
+        if self.free_shipping_minimum is not None and subtotal >= self.free_shipping_minimum:
+            shipping = 0
         fulfillment = {}
         for slug, quantity in quantities.items():
             for sku in CATALOG[slug][2]:
@@ -142,7 +153,7 @@ class Checkout:
             "client_reference_id": reference,
             "metadata[fernvow_order]": reference,
             "metadata[fernvow_subtotal]": subtotal,
-            "metadata[fernvow_shipping]": self.shipping,
+            "metadata[fernvow_shipping]": shipping,
             "metadata[fernvow_skus]": sku_quantities,
             "payment_intent_data[metadata][fernvow_order]": reference,
             "payment_intent_data[metadata][fernvow_skus]": sku_quantities,
@@ -152,7 +163,7 @@ class Checkout:
             "shipping_address_collection[allowed_countries][0]": "US",
             "shipping_options[0][shipping_rate_data][type]": "fixed_amount",
             "shipping_options[0][shipping_rate_data][display_name]": "Standard shipping",
-            "shipping_options[0][shipping_rate_data][fixed_amount][amount]": self.shipping,
+            "shipping_options[0][shipping_rate_data][fixed_amount][amount]": shipping,
             "shipping_options[0][shipping_rate_data][fixed_amount][currency]": "usd",
         }
         for index, (slug, quantity) in enumerate(quantities.items()):

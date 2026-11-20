@@ -50,6 +50,23 @@ class CheckoutTests(unittest.TestCase):
         self.assertNotIn("payment_method_types[0]", form)
         self.assertEqual(json.loads(form["payment_intent_data[metadata][fernvow_skus]"]), {"A5852": 3, "S0001": 2})
 
+    def test_free_shipping_uses_validated_merchandise_subtotal(self):
+        self.checkout.free_shipping_minimum = 6000
+        with patch.object(self.checkout, "stripe", return_value={"url": self.checkout_url}) as stripe:
+            for slug, quantity, subtotal, shipping in (
+                ("hydrating-toner", 2, 5990, 595),
+                ("the-daily-duo", 1, 6495, 0),
+            ):
+                with self.subTest(subtotal=subtotal):
+                    self.checkout.create({
+                        "reference": self.reference,
+                        "items": [{"slug": slug, "quantity": quantity}],
+                        "subtotalCents": subtotal,
+                    })
+                    form = stripe.call_args.args[1]
+                    self.assertEqual(form["shipping_options[0][shipping_rate_data][fixed_amount][amount]"], shipping)
+                    self.assertEqual(form["metadata[fernvow_shipping]"], shipping)
+
     def test_rejects_changed_prices_and_wrong_session_references(self):
         with patch.object(self.checkout, "stripe", return_value=self.session) as stripe:
             with self.assertRaisesRegex(CheckoutError, "pricing has changed"):

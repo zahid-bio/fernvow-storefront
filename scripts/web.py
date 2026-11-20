@@ -62,7 +62,10 @@ def checkout_api(checkout, environ, start_response):
     path = environ["PATH_INFO"]
     method = environ["REQUEST_METHOD"]
     if path == "/api/checkout/methods" and method == "GET":
-        return json_response(start_response, 200, {"enabled": checkout.enabled})
+        settings = {"enabled": checkout.enabled}
+        if checkout.enabled:
+            settings.update(shippingCents=checkout.shipping, freeShippingMinimumCents=checkout.free_shipping_minimum)
+        return json_response(start_response, 200, settings)
 
     try:
         if path not in {"/api/checkout", "/api/checkout/status", "/api/webhooks/stripe"}:
