@@ -65,7 +65,6 @@ export const PRODUCTS = [
     savingsAmount: 0,
     sizeDisplay: '150 mL / 5.07 fl oz',
     supplierSku: 'A5852',
-    shopifyVariantPlaceholderId: 'gid://shopify/ProductVariant/PENDING_A5852',
     fragranceStatus: 'contains-fragrance',
     fragranceBadge: 'Lightly Scented · Soft Floral',
     fragranceNote:
@@ -136,7 +135,6 @@ export const PRODUCTS = [
     savingsAmount: 9.95,
     sizeDisplay: '150 mL + 50 mL',
     supplierSku: 'A5852 + S0001',
-    shopifyVariantPlaceholderId: 'gid://shopify/ProductVariant/PENDING_DAILY_DUO_BUNDLE',
     fragranceStatus: 'mixed-duo',
     fragranceBadge: 'Foam: Lightly Scented · Cream: Fragrance-Free',
     fragranceNote:
@@ -228,7 +226,6 @@ export const PRODUCTS = [
     savingsAmount: 0,
     sizeDisplay: '50 mL / 1.69 fl oz',
     supplierSku: 'S0001',
-    shopifyVariantPlaceholderId: 'gid://shopify/ProductVariant/PENDING_S0001',
     fragranceStatus: 'fragrance-free',
     fragranceBadge: 'Fragrance-Free',
     fragranceNote:
@@ -291,7 +288,6 @@ export const PRODUCTS = [
     savingsAmount: 0,
     sizeDisplay: '200 mL / 6.76 fl oz',
     supplierSku: 'A5805',
-    shopifyVariantPlaceholderId: 'gid://shopify/ProductVariant/PENDING_A5805',
     fragranceStatus: 'fragrance-free',
     fragranceBadge: 'Fragrance-Free',
     fragranceNote:

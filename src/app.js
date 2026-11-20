@@ -1,6 +1,6 @@
-import { STOREFRONT_CONFIG } from '../config/storefront.config.js';
 import { formatMoney, getProductBySlug } from './data/catalog.js';
 import { createCommerceClient } from './services/commerce.js';
+import { beginCheckout, getCheckoutResult, isCheckoutEnabled, rememberCheckout } from './services/checkout.js';
 import {
   renderHeader,
   renderMobileMenu,
@@ -19,8 +19,16 @@ import { getPdpMediaOptions, renderPdpMedia, renderProductView } from './views/p
 import { renderRoutineView } from './views/routineView.js';
 import { renderBrandView } from './views/brandView.js';
 import { renderPoliciesView } from './views/policiesView.js';
+import { renderCheckoutResultView } from './views/checkoutResultView.js';
 
-const commerce = createCommerceClient(STOREFRONT_CONFIG);
+const commerce = createCommerceClient();
+const returnParams = new URLSearchParams(window.location.search);
+const orderReference = returnParams.get('order');
+if (/^[a-f0-9]{32}$/.test(orderReference || '')) {
+  window.history.replaceState(null, '', `/#/checkout/${orderReference}`);
+} else if (returnParams.get('checkout') === 'cancelled') {
+  window.history.replaceState(null, '', '/#/checkout/cancelled');
+}
 
 const state = {
   route: parseHash(window.location.hash),
@@ -33,6 +41,8 @@ const state = {
   isSearchOpen: false,
   searchQuery: '',
   checkoutMessage: '',
+  checkoutEnabled: false,
+  checkoutResult: { status: 'loading' },
 };
 
 let lastTrigger = null;
@@ -55,6 +65,9 @@ function parseHash(rawHash) {
   }
   if (parts[0] === 'product' && parts[1]) {
     return { name: 'product', slug: decode(parts[1]) };
+  }
+  if (parts[0] === 'checkout' && /^(?:[a-f0-9]{32}|cancelled)$/.test(parts[1] || '')) {
+    return { name: 'checkout', reference: parts[1] };
   }
   if (parts[0] === 'routine') {
     return { name: 'routine' };
@@ -84,6 +97,10 @@ function updateDocumentTitle(route) {
   }
   if (route.name === 'policies') {
     document.title = 'Care & Policies — Fernvow';
+    return;
+  }
+  if (route.name === 'checkout') {
+    document.title = 'Checkout — Fernvow';
     return;
   }
   document.title = 'Fernvow — Calm Daily Skincare';
@@ -129,7 +146,7 @@ function renderOverlays(animateIn = true) {
       cart: state.cart,
       isCheckingOut: Boolean(checkoutRequest),
       checkoutMessage: state.checkoutMessage,
-      preview: STOREFRONT_CONFIG.mode === 'preview',
+      preview: !state.checkoutEnabled,
     }),
     renderSearchModal({ isOpen: state.isSearchOpen, query: state.searchQuery }),
   ]
@@ -174,8 +191,12 @@ function renderActiveViewHtml() {
     case 'policies':
       return renderPoliciesView({
         section: state.route.section,
-        preview: STOREFRONT_CONFIG.mode === 'preview',
+        preview: !state.checkoutEnabled,
       });
+    case 'checkout':
+      return renderCheckoutResultView(state.route.reference === 'cancelled'
+        ? { status: 'cancelled' }
+        : { ...state.checkoutResult, reference: state.route.reference });
     case 'home':
     default:
       return renderHomeView({
@@ -322,33 +343,55 @@ function bindCollectionControls(explorer) {
 
 async function startCheckout() {
   if (!state.cart.itemCount || checkoutRequest) return;
+  const button = '[data-action="prepare-checkout"]';
+  if (!state.checkoutEnabled) {
+    state.checkoutMessage = 'Your items will still be in your bag when you return.';
+    renderOverlays(false);
+    focusElementSoon(button);
+    return;
+  }
 
   const request = {};
+  const cart = state.cart;
   checkoutRequest = request;
   state.checkoutMessage = '';
   renderOverlays(false);
-  focusElementSoon('[data-action="prepare-checkout"]');
+  focusElementSoon(button);
   try {
-    const result = await commerce.prepareCheckout();
+    const result = await beginCheckout(cart);
     if (checkoutRequest !== request) return;
-    if (result.isLive && result.checkoutUrl) {
-      window.location.assign(result.checkoutUrl);
-      return;
-    }
-    state.checkoutMessage = STOREFRONT_CONFIG.mode === 'preview'
-      ? 'Your items will still be in your bag when you return.'
-      : 'Checkout is unavailable right now. Please try again.';
-  } catch {
+    rememberCheckout(result.reference, cart);
+    window.location.assign(result.checkoutUrl);
+  } catch (error) {
     if (checkoutRequest === request) {
-      state.checkoutMessage = 'We couldn’t open checkout. Please try again.';
+      state.checkoutMessage = error.name === 'CheckoutError'
+        ? error.message : 'We couldn’t open checkout. Please try again.';
     }
   } finally {
     if (checkoutRequest === request) {
       checkoutRequest = null;
       renderOverlays(false);
-      focusElementSoon('[data-action="prepare-checkout"]');
+      focusElementSoon(button);
     }
   }
+}
+
+async function checkPaymentStatus() {
+  const { route } = state;
+  if (route.name !== 'checkout' || route.reference === 'cancelled') return;
+  state.checkoutResult = { status: 'loading' };
+  renderRoute();
+  document.getElementById('main-content').focus({ preventScroll: true });
+  try {
+    const result = await getCheckoutResult(route.reference, commerce);
+    if (state.route !== route) return;
+    state.checkoutResult = result;
+  } catch {
+    if (state.route !== route) return;
+    state.checkoutResult.status = 'error';
+  }
+  renderRoute();
+  document.getElementById('main-content').focus({ preventScroll: true });
 }
 
 function scrollToSection(id) {
@@ -508,6 +551,10 @@ document.addEventListener('click', (event) => {
       startCheckout();
       break;
     }
+    case 'check-payment-status': {
+      checkPaymentStatus();
+      break;
+    }
     default:
       break;
   }
@@ -558,6 +605,7 @@ window.addEventListener('hashchange', () => {
   const routeChanged =
     nextRoute.name !== state.route.name ||
     nextRoute.slug !== state.route.slug ||
+    nextRoute.reference !== state.route.reference ||
     nextRoute.section !== state.route.section;
 
   closeAllOverlays({ restoreFocus: false });
@@ -569,6 +617,7 @@ window.addEventListener('hashchange', () => {
   }
   renderRoute();
   if (routeChanged) document.getElementById('main-content').focus({ preventScroll: true });
+  if (routeChanged) checkPaymentStatus();
 });
 
 commerce.subscribe((nextCart) => {
@@ -580,3 +629,13 @@ commerce.subscribe((nextCart) => {
 });
 
 renderRoute();
+checkPaymentStatus();
+isCheckoutEnabled().then((enabled) => {
+  if (!enabled) return;
+  state.checkoutEnabled = true;
+  if (state.isCartOpen) {
+    renderOverlays(false);
+    focusElementSoon('#cart-drawer [data-action="close-cart"]');
+  }
+  if (state.route.name === 'policies') renderRoute();
+});

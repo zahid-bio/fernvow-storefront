@@ -15,7 +15,7 @@ Reviewed November 19, 2026. The goal is to help shoppers who are ready to buy ch
 
 ## From preview to paid orders
 
-1. **Payments.** Connect and test the gateway in the existing checkout flow. Verify a single-item order, The Daily Duo price, shipping and tax, any accepted wallets, an unsuccessful payment, the order confirmation, and a refund. Confirm the shipping and return policies reflect the real fulfillment process. See the [Shopify setup guide](shopify-selfnamed-setup.md).
+1. **Payments.** Connect and test the gateway in the existing checkout flow. Verify a single-item order, The Daily Duo price, shipping and tax, any accepted wallets, an unsuccessful payment, the order confirmation, and a refund. Confirm the shipping and return policies reflect the real fulfillment process. See the [payment setup guide](payments-setup.md).
 2. **Domain.** Run the same test order from the custom domain. Check guest checkout on mobile, accurate links to policies and customer support, and consistency between catalog, bag and payable total.
 3. **Ads and measurement.** Once real orders work, record product views, add-to-bag actions, checkout starts and completed paid orders. Count a purchase using the order record and deduplicate it by order ID. Review purchase rate and revenue per visitor by landing page, device and campaign. Use add-to-bag and checkout rates to locate friction between steps.
 

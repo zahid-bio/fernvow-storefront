@@ -63,7 +63,7 @@ export const POLICIES = {
       },
       {
         heading: 'Order & Checkout Information',
-        body: 'Payment processing, shipping addresses, and order receipts are handled over encrypted Shopify checkout connections. Fernvow never stores raw card details directly.',
+        body: 'Our payment providers process payments through their hosted checkout pages. Fernvow uses order and shipping details to fulfill your purchase and never sees your full card number.',
       },
       {
         heading: 'Privacy Requests',

@@ -626,6 +626,10 @@ summary:focus-visible { outline-offset: -4px; }
 .cart-checkout-status { font-size: .9375rem; color: var(--coral-dark); }
 .cart-drawer__foot { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
 
+.checkout-result .lead-copy { margin-block: .85rem 1.4rem; }
+.checkout-result__reference { margin-bottom: 1.4rem; color: var(--ink-secondary); overflow-wrap: anywhere; }
+.checkout-result .btn { margin: 0 .45rem .45rem 0; }
+
 @media (max-width: 850px) {
   .store-hero__layout { grid-template-columns: minmax(0, 1fr) minmax(0, 2.55fr) minmax(0, 1fr); }
   .store-hero h1 { font-size: clamp(3.4rem, 8.6vw, 5.75rem); }
