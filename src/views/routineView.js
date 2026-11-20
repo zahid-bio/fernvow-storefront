@@ -5,14 +5,14 @@ import { renderProductCard } from './homeView.js';
 export function renderRoutineView() {
   const steps = [
     ['Cleanse', 'daily-cleansing-foam'],
-    ['Tone, if you like', 'hydrating-toner'],
+    ['Tone', 'hydrating-toner'],
     ['Moisturize', 'daily-face-moisturizer'],
   ];
   return `
     <div class="container routine-page">
       <header class="routine-page__intro">
         <h1 class="store-heading">Your daily routine</h1>
-        <p>Start with a gentle wash, add toner if you like, then smooth on moisturizer.</p>
+        <p>Start with a gentle cleanse, follow with a layer of Hydrating Toner, and finish with Daily Face Moisturizer.</p>
       </header>
       <img class="routine-page__banner" src="assets/photos/editorial-routine-lineup.jpg"
         alt="Fernvow cleanser, toner and moisturizer arranged on a stone counter" />

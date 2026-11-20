@@ -4,7 +4,9 @@
 
 The bottle wraps and moisturizer carton dieline in `assets/packaging` match the designs saved in Selfnamed. The six front panels and proof sheet show the whole design family. Selfnamed offers a printable carton for the moisturizer and a bottle label for each formula. The cleanser and toner carton fronts are concept artwork.
 
-The three individual storefront packshots are exported from Selfnamed. The Daily Duo, homepage cutout, and routine photos use built-in ImageGen with the Selfnamed packshots as references. The collection carousel uses the earlier editorial photos, with 1600 × 640 desktop panels and 720 × 720 mobile panels.
+The three individual storefront photos use built-in ImageGen with the Selfnamed packshots as packaging references and The Daily Duo photo as the lighting and styling reference. The collection carousel uses the earlier editorial photos, with 1600 × 640 desktop panels and 720 × 720 mobile panels.
+
+The individual-photo prompts asked for readable label text, exact bottle and closure shapes, and full product framing in a portrait 4:5 crop. They pair the cleansing foam with peach-blush plaster, the moisturizer and its carton with champagne limestone, and the toner with sage plaster. All three use angled window light, textured stone, and soft fill on the labels to match The Daily Duo.
 
 The packaging prompts asked ImageGen to flatten the approved reference into six print panels, preserve the high-contrast wordmark and detailed ferns and flowers, and keep each formula's color and exact label text. The bottle artwork was color-corrected to neutral white and fitted to each supplier wrap. The photo prompts asked for the exact white bottles, closures, and artwork in sunlit stone and plaster settings, with a transparent background for the homepage cutout.
 

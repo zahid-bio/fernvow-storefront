@@ -740,6 +740,52 @@ html.has-dialog { overflow-y: hidden; }
 .brand-feature { margin-top: 1.65rem; }
 .brand-feature > img { max-height: 520px; }
 
+.brand-approach {
+  padding-block: var(--store-section-gap);
+}
+
+.brand-approach__points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem clamp(1.6rem, 5vw, 4.5rem);
+  margin-top: 1.4rem;
+}
+
+.brand-approach__points > div { border-top: 1px solid var(--hairline-strong); padding-top: 1rem; }
+.brand-approach__points h3 { margin-bottom: .4rem; font-size: 1.125rem; }
+.brand-approach__points p, .brand-collection p { max-width: 48ch; }
+
+.brand-collection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  border-radius: .8rem;
+  background: linear-gradient(135deg, var(--bottle-gold), var(--bottle-pink));
+}
+
+.brand-collection p { margin-top: .65rem; }
+
+.quick-checkout {
+  position: fixed;
+  z-index: var(--z-header);
+  inset-inline-end: max(var(--gutter), env(safe-area-inset-right));
+  inset-block-end: calc(1rem + env(safe-area-inset-bottom));
+  box-shadow: 0 8px 24px #26332138;
+}
+
+.quick-checkout[hidden] { display: none; }
+.has-dialog .quick-checkout { visibility: hidden; }
+.app-shell:has(.quick-checkout:not([hidden])) .store-footer {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 640px) {
+  .brand-approach__points { grid-template-columns: 1fr; }
+}
+
 .search-count-label { margin-bottom: .6rem; color: var(--ink-secondary); }
 .search-result-card { grid-template-columns: 52px minmax(0, 1fr) auto; gap: .65rem; }
 .search-result-card__img { width: 52px; height: 52px; object-fit: cover; }

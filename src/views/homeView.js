@@ -73,7 +73,7 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
 const QUESTIONS = [
   ['Where should I start?', 'Start with the <a href="#/product/daily-cleansing-foam">Daily Cleansing Foam</a>. For a simple two-step routine, <a href="#/product/the-daily-duo">The Daily Duo</a> pairs it with moisturizer.'],
   ['Which products are fragrance-free?', 'The <a href="#/product/hydrating-toner">Hydrating Toner</a> and <a href="#/product/daily-face-moisturizer">Daily Face Moisturizer</a> are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
-  ['Do I need to use all three steps?', 'Cleanse and moisturize for a simple routine. Add the <a href="#/product/hydrating-toner">Hydrating Toner</a> in between if you like a light layer of hydration.'],
+  ['What order do I use them in?', 'Cleanse first, follow with <a href="#/product/hydrating-toner">Hydrating Toner</a>, and finish with moisturizer. <a href="#/product/the-daily-duo">The Daily Duo</a> pairs the first and last steps for a two-step routine.'],
 ];
 
 export function filterAndSortProducts(activeFilter = 'all', sortBy = 'featured') {
@@ -183,7 +183,7 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
         width="896" height="1200" loading="lazy" />
       <div class="routine-feature__copy">
         <h2 class="store-heading" id="routine-feature-title">Keep it simple.</h2>
-        <p>Cleanse, add a little hydration if you like, then moisturize. Find what feels right for your skin.</p>
+        <p>Cleanse, layer on hydration with toner, and finish with moisturizer.</p>
         <a href="#/routine" class="btn btn--fern">See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
       </div>
     </section>

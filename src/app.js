@@ -98,7 +98,7 @@ function updateDocumentTitle(route) {
     return;
   }
   if (route.name === 'philosophy' || route.name === 'brand') {
-    document.title = 'Philosophy — Fernvow';
+    document.title = 'About Fernvow';
     return;
   }
   if (route.name === 'policies') {
@@ -141,6 +141,14 @@ function updateHeaderCounts() {
   }
 }
 
+function updateQuickCheckout() {
+  const button = document.getElementById('quick-checkout');
+  if (!button) return;
+  button.hidden = !state.checkoutEnabled || !state.cart.itemCount || state.route.name === 'checkout';
+  button.setAttribute('aria-disabled', String(Boolean(checkoutRequest)));
+  button.textContent = checkoutRequest ? 'Opening checkout…' : `Checkout · ${formatMoney(state.cart.subtotal)}`;
+}
+
 function renderOverlays(animateIn = true) {
   const overlayRoot = document.getElementById('overlay-root');
   if (!overlayRoot) return;
@@ -162,8 +170,10 @@ function renderOverlays(animateIn = true) {
 
   overlayRoot.innerHTML = html;
   document.documentElement.classList.toggle('has-dialog', Boolean(html));
-  for (const id of ['header-root', 'main-content', 'footer-root']) {
-    document.getElementById(id).inert = Boolean(html);
+  updateQuickCheckout();
+  for (const id of ['header-root', 'quick-checkout', 'main-content', 'footer-root']) {
+    const region = document.getElementById(id);
+    if (region) region.inert = Boolean(html);
   }
 
   const overlayEls = overlayRoot.querySelectorAll(
@@ -249,7 +259,9 @@ function closeAllOverlays({ restoreFocus = true } = {}) {
     updateHeaderCounts();
     renderOverlays(false);
     if (restoreFocus) {
-      const target = lastTrigger?.isConnected ? lastTrigger : document.querySelector('[data-action="open-cart"]');
+      const target = lastTrigger?.isConnected && !lastTrigger.hidden
+        ? lastTrigger
+        : document.querySelector('[data-action="open-cart"]');
       target?.focus();
     }
     lastTrigger = null;
@@ -348,16 +360,17 @@ function bindCollectionControls(explorer) {
   return () => resizeObserver.disconnect();
 }
 
-async function startCheckout() {
+async function startCheckout(trigger) {
   if (!state.checkoutEnabled || !state.cart.itemCount || checkoutRequest) return;
-  const button = '[data-action="prepare-checkout"]';
+  const drawerButton = '#cart-drawer [data-action="prepare-checkout"]';
 
   const request = {};
   const cart = state.cart;
   checkoutRequest = request;
   state.checkoutMessage = '';
   renderOverlays(false);
-  focusElementSoon(button);
+  if (state.isCartOpen) focusElementSoon(drawerButton);
+  else announce('Opening checkout…');
   try {
     const result = await beginCheckout(cart);
     if (checkoutRequest !== request) return;
@@ -367,12 +380,18 @@ async function startCheckout() {
     if (checkoutRequest === request) {
       state.checkoutMessage = error.name === 'CheckoutError'
         ? error.message : 'We couldn’t open checkout. Please try again.';
+      if (trigger.id === 'quick-checkout') {
+        lastTrigger = trigger;
+        state.isMobileMenuOpen = false;
+        state.isSearchOpen = false;
+        state.isCartOpen = true;
+      }
     }
   } finally {
     if (checkoutRequest === request) {
       checkoutRequest = null;
       renderOverlays(false);
-      focusElementSoon(button);
+      if (state.isCartOpen) focusElementSoon(drawerButton);
     }
   }
 }
@@ -536,8 +555,6 @@ document.addEventListener('click', (event) => {
     case 'cart-qty':
     case 'remove-cart-item': {
       const { slug, qty, change } = actionEl.dataset;
-      checkoutRequest = null;
-      state.checkoutMessage = '';
       if (action === 'cart-qty') commerce.updateQuantity(slug, Number(qty));
       else commerce.removeItem(slug);
       const item = state.cart.items.find((line) => line.slug === slug);
@@ -551,7 +568,7 @@ document.addEventListener('click', (event) => {
       break;
     }
     case 'prepare-checkout': {
-      startCheckout();
+      startCheckout(actionEl);
       break;
     }
     case 'check-payment-status': {
@@ -626,10 +643,14 @@ window.addEventListener('hashchange', () => {
 });
 
 commerce.subscribe((nextCart) => {
+  checkoutRequest = null;
+  state.checkoutMessage = '';
   state.cart = nextCart;
   updateHeaderCounts();
   if (state.isCartOpen) {
     renderOverlays(false);
+  } else {
+    updateQuickCheckout();
   }
 });
 
@@ -647,6 +668,7 @@ getCheckoutSettings().then(({ enabled, shippingCents, freeShippingMinimumCents }
   if (enabled !== true) return;
   state.checkoutEnabled = true;
   if (Number.isInteger(shippingCents)) state.shipping = { shippingCents, freeShippingMinimumCents };
+  updateQuickCheckout();
   if (state.isCartOpen) {
     renderOverlays(false);
     focusElementSoon('#cart-drawer [data-action="close-cart"]');
