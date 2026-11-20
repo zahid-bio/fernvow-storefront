@@ -2,6 +2,7 @@ import { formatMoney, getProductBySlug } from './data/catalog.js';
 import { getPageMetadata, getPageTags, SITE_ORIGIN } from './data/seo.js';
 import { createCommerceClient } from './services/commerce.js';
 import { beginCheckout, getCheckoutResult, getCheckoutSettings, rememberCheckout } from './services/checkout.js';
+import { bindTikTokPreferences, trackTikTok, trackTikTokView } from './services/tiktokPixel.js';
 import {
   renderHeader,
   renderMobileMenu,
@@ -372,6 +373,7 @@ async function startCheckout(trigger) {
     const result = await beginCheckout(cart);
     if (checkoutRequest !== request) return;
     rememberCheckout(result.reference, cart);
+    trackTikTok('InitiateCheckout', cart.items, cart.subtotal);
     window.location.assign(result.checkoutUrl);
   } catch (error) {
     if (checkoutRequest === request) {
@@ -555,6 +557,7 @@ document.addEventListener('click', (event) => {
         state.isMobileMenuOpen = false;
         state.isSearchOpen = false;
         commerce.addItem(slug, qty);
+        trackTikTok('AddToCart', [{ product, quantity: qty }], product.price * qty);
         updateHeaderCounts();
         renderOverlays(!wasOpen);
         announce(`Added ${qty} × ${product.name} to your bag.`);
@@ -645,6 +648,7 @@ function handleLocationChange() {
     state.pdpQty = 1;
     window.scrollTo({ top: 0, behavior: 'instant' });
     renderRoute();
+    trackTikTokView(nextRoute);
     if (window.location.hash !== '#collection') document.getElementById('main-content').focus({ preventScroll: true });
     checkPaymentStatus();
   }
@@ -667,6 +671,8 @@ commerce.subscribe((nextCart) => {
 });
 
 renderRoute();
+bindTikTokPreferences(() => trackTikTokView(state.route));
+trackTikTokView(state.route);
 const storeIntro = document.getElementById('store-intro');
 const opensAtCollection = window.location.hash === '#collection';
 if (state.route.name !== 'home' || opensAtCollection) {

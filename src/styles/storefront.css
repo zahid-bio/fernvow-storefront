@@ -679,6 +679,23 @@ summary:focus-visible { outline-offset: -4px; }
 .checkout-result__reference { margin-bottom: 1.4rem; color: var(--ink-secondary); overflow-wrap: anywhere; }
 .checkout-result .btn { margin: 0 .45rem .45rem 0; }
 
+.ad-measurement {
+  position: fixed;
+  z-index: var(--z-toast);
+  inset-inline-start: 1rem;
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  width: min(24rem, calc(100% - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: .75rem;
+  background: var(--bg-paper);
+  box-shadow: var(--store-shadow);
+}
+.ad-measurement p { margin: 0 0 .75rem; }
+.ad-measurement a { text-decoration: underline; }
+.ad-measurement__actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ad-measurement__actions .btn { min-height: 44px; font-size: .875rem; }
+
 @media (max-width: 850px) {
   .store-hero__layout { grid-template-columns: minmax(0, 1fr) minmax(0, 2.55fr) minmax(0, 1fr); }
   .store-hero h1 { font-size: clamp(3.4rem, min(8.6vw, 13svh), 5.75rem); }

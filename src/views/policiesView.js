@@ -59,6 +59,10 @@ export function renderPoliciesView({ section = 'shipping', checkoutEnabled = fal
               .join('')}
           </div>
 
+          ${activeId === 'privacy' ? `
+            <button type="button" class="btn btn--outline" data-tiktok-preferences>Manage TikTok measurement</button>
+          ` : ''}
+
           ${activeId === 'contact' ? `
             <div><a class="btn btn--fern" href="mailto:care@fernvow.com">Email customer care</a></div>
           ` : ''}
