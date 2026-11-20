@@ -412,6 +412,10 @@ dd {
 }
 
 .initial-loading {
+  display: none;
+}
+
+.store-js .initial-loading {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-toast) + 1);

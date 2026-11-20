@@ -18,8 +18,8 @@ export function renderSearchResults(query) {
     <p class="search-count-label" role="status">${matches.length} ${matches.length === 1 ? 'product' : 'products'}</p>
     <div class="search-results">
       ${matches.length === 0 ? `<p>No results for “${escapeHtml(query)}”. Try “cleanser” or “toner”.</p>` : matches.map((product) => `
-        <a href="#/product/${product.slug}" class="search-result-card" data-action="close-search">
-          <img src="${escapeHtml(product.images.primary)}" alt="" class="search-result-card__img" width="60" height="60" />
+        <a href="/product/${product.slug}" class="search-result-card" data-action="close-search">
+          <img src="/${escapeHtml(product.images.primary)}" alt="" class="search-result-card__img" width="60" height="60" />
           <span class="cart-item__name">${escapeHtml(product.name)}</span>
           <strong>${formatMoney(product.price)}</strong>
         </a>

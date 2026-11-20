@@ -6,6 +6,7 @@ import json
 import logging
 import mimetypes
 import os
+import re
 from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -17,6 +18,8 @@ else:
     from checkout import Checkout, CheckoutError
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+PUBLIC_PAGE = re.compile(r"(?:product|policies)/[a-z0-9-]+|routine|philosophy")
+PUBLIC_VERIFICATION_FILE = re.compile(r"google[0-9a-f]+\.html")
 RESPONSE_HEADERS = [
     ("Cache-Control", "no-store"),
     ("X-Content-Type-Options", "nosniff"),
@@ -41,10 +44,21 @@ def json_response(start_response, status, payload):
 
 
 def serve_file(environ, start_response):
-    location = (ROOT_DIR / (environ["PATH_INFO"].lstrip("/") or "index.html")).resolve()
-    relative = location.relative_to(ROOT_DIR) if location.is_relative_to(ROOT_DIR) else None
-    public = relative is not None and relative.parts and (relative.parts[0] in {"src", "assets"}
-                           or relative.as_posix() in {"index.html", "config/storefront.config.js"})
+    request_path = environ["PATH_INFO"].strip("/")
+    if not request_path or PUBLIC_PAGE.fullmatch(request_path):
+        location = ROOT_DIR / "dist" / request_path / "index.html"
+        if not request_path and not location.is_file():
+            location = ROOT_DIR / "index.html"
+        public = True
+    elif request_path in {"robots.txt", "sitemap.xml"} or PUBLIC_VERIFICATION_FILE.fullmatch(request_path):
+        location = ROOT_DIR / "dist" / request_path
+        public = True
+    else:
+        location = (ROOT_DIR / request_path).resolve()
+        relative = location.relative_to(ROOT_DIR) if location.is_relative_to(ROOT_DIR) else None
+        public = relative is not None and bool(relative.parts) and (
+            relative.parts[0] in {"src", "assets"} or relative.as_posix() == "config/storefront.config.js"
+        )
     if not public or not location.is_file():
         return json_response(start_response, 404, {"message": "Not found."})
     content_type = CONTENT_TYPES.get(location.suffix) or mimetypes.guess_type(location)[0]

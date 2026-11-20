@@ -38,7 +38,7 @@ export function getPdpMediaOptions(product) {
 }
 
 export function renderPdpMedia(media) {
-  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media="${media.id}" fetchpriority="high" />`;
+  return `<img src="/${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media="${media.id}" fetchpriority="high" />`;
 }
 
 function renderIngredients(product) {
@@ -81,7 +81,7 @@ function renderProductStory(product, qty, detailPhoto) {
   return `
     <section class="product-story" aria-labelledby="product-story-title">
       <div class="product-story__ritual">
-        <img src="${escapeHtml(images.editorialImage)}" alt="${escapeHtml(images.editorialAlt)}"
+        <img src="/${escapeHtml(images.editorialImage)}" alt="${escapeHtml(images.editorialAlt)}"
           width="1040" height="780" loading="lazy" decoding="async" />
         <div class="product-story__copy">
           <p class="section-label">How to use</p>
@@ -94,7 +94,7 @@ function renderProductStory(product, qty, detailPhoto) {
       </div>
 
       <div class="product-story__details">
-        <img src="${escapeHtml(detailPhoto.src)}" alt="${escapeHtml(detailPhoto.alt)}"
+        <img src="/${escapeHtml(detailPhoto.src)}" alt="${escapeHtml(detailPhoto.alt)}"
           width="900" height="675" loading="lazy" decoding="async" />
         <div class="product-story__copy">
           <p class="section-label">${escapeHtml(name)}</p>
@@ -118,7 +118,7 @@ export function renderProductView({ slug, qty = 1 }) {
     return `
       <section class="container section-block">
         <h1 class="store-heading">We couldn’t find that product.</h1>
-        <a href="#/" class="btn btn--fern">Back to shop</a>
+        <a href="/" class="btn btn--fern">Back to shop</a>
       </section>
     `;
   }
@@ -129,7 +129,7 @@ export function renderProductView({ slug, qty = 1 }) {
   return `
     <div class="container product-page" data-formula="${escapeHtml(product.category)}">
       <nav class="product-breadcrumb" aria-label="Breadcrumb">
-        <a href="#/">Shop</a>
+        <a href="/">Shop</a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">${escapeHtml(product.name)}</span>
       </nav>
@@ -140,7 +140,7 @@ export function renderProductView({ slug, qty = 1 }) {
             ${mediaOptions.map(({ id, label, src }) => `
               <button type="button" class="product-gallery__button" data-action="set-pdp-media"
                 data-media="${id}" data-slug="${slug}" aria-pressed="${String(id === 'studio')}" aria-controls="pdp-stage">
-                <img src="${escapeHtml(src)}" alt="" width="40" height="40" />
+                <img src="/${escapeHtml(src)}" alt="" width="40" height="40" />
                 <span>${label}</span>
               </button>
             `).join('')}
@@ -169,8 +169,8 @@ export function renderProductView({ slug, qty = 1 }) {
           </div>
 
           <nav class="product-order-links" aria-label="Order information">
-            <a href="#/policies/shipping">Shipping and delivery</a>
-            <a href="#/policies/returns">Returns</a>
+            <a href="/policies/shipping">Shipping and delivery</a>
+            <a href="/policies/returns">Returns</a>
           </nav>
 
           <dl class="product-quick-facts" aria-label="Formula at a glance">
@@ -183,7 +183,7 @@ export function renderProductView({ slug, qty = 1 }) {
             <div class="product-includes">
               <h2>In the set</h2>
               ${product.bundleComponents.map((item) => `
-                <a class="store-text-link" href="#/product/${escapeHtml(item.productSlug)}">
+                <a class="store-text-link" href="/product/${escapeHtml(item.productSlug)}">
                   ${escapeHtml(item.name)} <span>${escapeHtml(item.size)}</span>
                 </a>
               `).join('')}

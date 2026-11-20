@@ -28,17 +28,17 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
         ${items.length === 0 ? `
           <div class="cart-drawer__empty">
             <p class="lead-copy">Your bag is empty.</p>
-            <a class="btn btn--fern" href="#/" data-action="close-cart">Browse skincare</a>
+            <a class="btn btn--fern" href="/" data-action="close-cart">Browse skincare</a>
           </div>
         ` : `
           <div class="cart-items-list">
             ${items.map(({ slug, quantity, product, lineTotal }) => `
               <article class="cart-item">
                 <div class="cart-item__media">
-                  <img src="${escapeHtml(product.images.primary)}" alt="" width="76" height="90" />
+                  <img src="/${escapeHtml(product.images.primary)}" alt="" width="76" height="90" />
                 </div>
                 <div class="cart-item__content">
-                  <h3 class="cart-item__name"><a href="#/product/${slug}" data-action="close-cart">${escapeHtml(product.name)}</a></h3>
+                  <h3 class="cart-item__name"><a href="/product/${slug}" data-action="close-cart">${escapeHtml(product.name)}</a></h3>
                   <div class="cart-item__controls">
                     <div class="qty-stepper" role="group" aria-label="Quantity for ${escapeHtml(product.name)}">
                       <button type="button" class="qty-stepper__btn" data-action="cart-qty" data-slug="${slug}"

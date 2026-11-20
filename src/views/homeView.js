@@ -27,8 +27,8 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
         <div class="cat-stage__bgs" aria-hidden="true">
           ${TICKER_ITEMS.map(({ id, image }) => `
             <picture class="cat-stage__bg ${id === activeFilter ? 'is-active' : ''}" data-cat="${id}">
-              <source media="(max-width: 640px)" srcset="assets/photos/ticker-${image}-mobile.webp" width="720" height="720" />
-              <img src="assets/photos/ticker-${image}-wide.webp" alt="" width="1600" height="640"
+              <source media="(max-width: 640px)" srcset="/assets/photos/ticker-${image}-mobile.webp" width="720" height="720" />
+              <img src="/assets/photos/ticker-${image}-wide.webp" alt="" width="1600" height="640"
                 loading="lazy" decoding="async"${id === activeFilter ? '' : ' fetchpriority="low"'} />
             </picture>
           `).join('')}
@@ -72,9 +72,9 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
 }
 
 const QUESTIONS = [
-  ['Where should I start?', 'Start with the <a href="#/product/daily-cleansing-foam">Daily Cleansing Foam</a>. For a simple two-step routine, <a href="#/product/the-daily-duo">The Daily Duo</a> pairs it with moisturizer.'],
-  ['Which products are fragrance-free?', 'The <a href="#/product/hydrating-toner">Hydrating Toner</a> and <a href="#/product/daily-face-moisturizer">Daily Face Moisturizer</a> are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
-  ['What order do I use them in?', 'Cleanse first, follow with <a href="#/product/hydrating-toner">Hydrating Toner</a>, and finish with moisturizer. <a href="#/product/the-daily-trio">The Daily Trio</a> includes all three steps.'],
+  ['Where should I start?', 'Start with the <a href="/product/daily-cleansing-foam">Daily Cleansing Foam</a>. For a simple two-step routine, <a href="/product/the-daily-duo">The Daily Duo</a> pairs it with moisturizer.'],
+  ['Which products are fragrance-free?', 'The <a href="/product/hydrating-toner">Hydrating Toner</a> and <a href="/product/daily-face-moisturizer">Daily Face Moisturizer</a> are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
+  ['What order do I use them in?', 'Cleanse first, follow with <a href="/product/hydrating-toner">Hydrating Toner</a>, and finish with moisturizer. <a href="/product/the-daily-trio">The Daily Trio</a> includes all three steps.'],
 ];
 
 export function filterAndSortProducts(activeFilter = 'all', sortBy = 'featured') {
@@ -95,11 +95,11 @@ export function renderProductCard(product) {
   const name = escapeHtml(product.name);
   return `
     <article class="shop-card" data-formula="${escapeHtml(product.category)}">
-      <a href="#/product/${slug}" class="shop-card__photo" tabindex="-1" aria-hidden="true">
-        <img src="${escapeHtml(product.images.primary)}" alt="" loading="lazy" width="960" height="1200" />
+      <a href="/product/${slug}" class="shop-card__photo" tabindex="-1" aria-hidden="true">
+        <img src="/${escapeHtml(product.images.primary)}" alt="" loading="lazy" width="960" height="1200" />
       </a>
       <div class="shop-card__info">
-        <h3><a href="#/product/${slug}">${name}</a></h3>
+        <h3><a href="/product/${slug}">${name}</a></h3>
         <p>${escapeHtml(product.benefit)}</p>
         <p class="shop-card__facts">
           ${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}
@@ -127,8 +127,8 @@ export function renderHomeCatalogGrid(products) {
 
 function renderHeroFeature(product, slot) {
   return `
-    <a href="#/product/${product.slug}" class="hero-feature hero-feature--${slot}">
-      <img src="${escapeHtml(product.images.editorialImage)}" alt="" width="480" height="360" decoding="async" />
+    <a href="/product/${product.slug}" class="hero-feature hero-feature--${slot}">
+      <img src="/${escapeHtml(product.images.editorialImage)}" alt="" width="480" height="360" decoding="async" />
       <span class="hero-feature__text">
         <span>${escapeHtml(product.name)}</span>
         <strong>${formatMoney(product.price)}</strong>
@@ -152,7 +152,7 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
         </div>
 
         <div class="store-hero__art">
-          <img src="assets/photos/campaign-lineup.webp"
+          <img src="/assets/photos/campaign-lineup.webp"
             alt="Fernvow moisturizer, cleanser and toner on a coral stone shelf"
             width="990" height="660" fetchpriority="high" />
         </div>
@@ -162,7 +162,7 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
           <a href="#collection" class="btn store-hero__shop" data-action="scroll-collection">
             Shop the collection ${iconSvg('icon-chevron-down', 'icon--sm')}
           </a>
-          <a href="#/routine" class="store-hero__routine">
+          <a href="/routine" class="store-hero__routine">
             See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}
           </a>
         </div>
@@ -180,12 +180,12 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
     </section>
 
     <section class="container routine-feature" aria-labelledby="routine-feature-title">
-      <img src="assets/photos/editorial-lifestyle-portrait.jpg" alt="A woman taking a quiet moment during her skincare routine"
+      <img src="/assets/photos/editorial-lifestyle-portrait.jpg" alt="A woman taking a quiet moment during her skincare routine"
         width="896" height="1200" loading="lazy" />
       <div class="routine-feature__copy">
         <h2 class="store-heading" id="routine-feature-title">Keep it simple.</h2>
         <p>Cleanse, layer on hydration with toner, and finish with moisturizer.</p>
-        <a href="#/routine" class="btn btn--fern">See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
+        <a href="/routine" class="btn btn--fern">See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
       </div>
     </section>
 

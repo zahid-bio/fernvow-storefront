@@ -9,20 +9,20 @@ export function escapeHtml(value) {
 
 export function iconSvg(id, extraClass = '') {
   const cls = extraClass ? `icon ${extraClass}` : 'icon';
-  return `<svg class="${cls}" aria-hidden="true"><use href="assets/icons/fernvow-icons.svg#${escapeHtml(id)}"></use></svg>`;
+  return `<svg class="${cls}" aria-hidden="true"><use href="/assets/icons/fernvow-icons.svg#${escapeHtml(id)}"></use></svg>`;
 }
 
 export const NAV_ITEMS = [
-  { label: 'Shop', hash: '#/', match: (route) => route.name === 'home' },
+  { label: 'Shop', href: '/', match: (route) => route.name === 'home' },
   {
     label: 'The Duo',
-    hash: '#/product/the-daily-duo',
+    href: '/product/the-daily-duo',
     match: (route) => route.name === 'product' && route.slug === 'the-daily-duo',
   },
-  { label: 'Routine', hash: '#/routine', match: (route) => route.name === 'routine' },
+  { label: 'Routine', href: '/routine', match: (route) => route.name === 'routine' },
   {
     label: 'About',
-    hash: '#/philosophy',
+    href: '/philosophy',
     match: (route) => route.name === 'brand' || route.name === 'philosophy',
   },
 ];
@@ -32,7 +32,7 @@ export function renderHeader({ route, cart, isMobileMenuOpen = false }) {
 
   const navLinksHtml = NAV_ITEMS.map((item) => {
     const active = item.match(route);
-    return `<a href="${item.hash}" class="site-nav__link ${active ? 'is-active' : ''}" ${
+    return `<a href="${item.href}" class="site-nav__link ${active ? 'is-active' : ''}" ${
       active ? 'aria-current="page"' : ''
     }>${escapeHtml(item.label)}</a>`;
   }).join('');
@@ -40,7 +40,7 @@ export function renderHeader({ route, cart, isMobileMenuOpen = false }) {
   return `
     <header class="site-header" id="site-header">
       <div class="container site-header__inner">
-        <a href="#/" class="site-brand" aria-label="Fernvow home">
+        <a href="/" class="site-brand" aria-label="Fernvow home">
           <span class="site-brand__word">fernvow</span>
         </a>
 
@@ -91,11 +91,11 @@ export function renderMobileMenu({ isOpen, route }) {
 
   const mobileLinksHtml = [
     ...NAV_ITEMS,
-    { label: 'Care & Policies', hash: '#/policies/shipping', match: (r) => r.name === 'policies' },
+    { label: 'Care & Policies', href: '/policies/shipping', match: (r) => r.name === 'policies' },
   ]
     .map((item) => {
       const active = item.match(route);
-      return `<a href="${item.hash}" class="mobile-nav-drawer__link ${active ? 'is-active' : ''}" data-close-mobile-menu ${
+      return `<a href="${item.href}" class="mobile-nav-drawer__link ${active ? 'is-active' : ''}" data-close-mobile-menu ${
         active ? 'aria-current="page"' : ''
       }><span>${escapeHtml(item.label)}</span>${iconSvg('icon-arrow-right', 'icon--sm')}</a>`;
     })

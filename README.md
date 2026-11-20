@@ -5,10 +5,11 @@ A skincare storefront with a six-category catalog, product details, photo galler
 ## Run locally
 
 ```bash
+python3 scripts/build_static.py
 python3 scripts/dev_server.py
 ```
 
-Open [the local storefront](http://127.0.0.1:4173). Set `PORT=8080` to select a different port. The Vercel configuration builds the public storefront in `dist/` and serves the checkout through Python functions. Navigation uses hash routes.
+Use Python 3 and Node.js 22 or newer. Open [the local storefront](http://127.0.0.1:4173). Set `PORT=8080` to select a different port. The build writes the public pages and sitemap to `dist/`. Vercel serves those pages and routes checkout through Python functions. Existing hash links resolve to the public product URLs, while private checkout returns continue to use fragments.
 
 ## Storefront files
 

@@ -1,4 +1,5 @@
 import { formatMoney, getProductBySlug } from './data/catalog.js';
+import { getPageMetadata, getPageTags, SITE_ORIGIN } from './data/seo.js';
 import { createCommerceClient } from './services/commerce.js';
 import { beginCheckout, getCheckoutResult, getCheckoutSettings, rememberCheckout } from './services/checkout.js';
 import {
@@ -33,7 +34,7 @@ if (/^[a-f0-9]{32}$/.test(orderReference || '') && checkoutSessionPattern.test(c
 }
 
 const state = {
-  route: parseHash(window.location.hash),
+  route: readRoute(),
   cart: commerce.getCart(),
   activeFilter: 'all',
   sortBy: 'featured',
@@ -52,7 +53,7 @@ let lastTrigger = null;
 let checkoutRequest = null;
 let disconnectCollectionObserver;
 
-function parseHash(rawHash) {
+function parsePath(path, allowCheckout = false) {
   const decode = (segment) => {
     try {
       return decodeURIComponent(segment);
@@ -60,8 +61,7 @@ function parseHash(rawHash) {
       return segment;
     }
   };
-  const cleaned = String(rawHash || '#/').replace(/^#/, '') || '/';
-  const parts = cleaned.split('/').filter(Boolean);
+  const parts = path.split('/').filter(Boolean);
 
   if (parts.length === 0) {
     return { name: 'home' };
@@ -69,7 +69,7 @@ function parseHash(rawHash) {
   if (parts[0] === 'product' && parts[1]) {
     return { name: 'product', slug: decode(parts[1]) };
   }
-  if (parts[0] === 'checkout') {
+  if (allowCheckout && parts[0] === 'checkout') {
     if (parts[1] === 'cancelled') return { name: 'checkout', reference: 'cancelled' };
     if (/^[a-f0-9]{32}$/.test(parts[1] || '') && checkoutSessionPattern.test(parts[2] || '')) {
       return { name: 'checkout', reference: parts[1], sessionId: parts[2] };
@@ -87,29 +87,26 @@ function parseHash(rawHash) {
   return { name: 'home' };
 }
 
-function updateDocumentTitle(route) {
-  if (route.name === 'product') {
-    const product = getProductBySlug(route.slug);
-    document.title = product ? `${product.name} — Fernvow` : 'Formula Not Found — Fernvow';
-    return;
+function readRoute() {
+  const { pathname, hash, search } = window.location;
+  if (pathname === '/' && hash.startsWith('#/')) {
+    const route = parsePath(hash.slice(1), true);
+    const page = getPageMetadata(route);
+    if (!page.noindex) window.history.replaceState(null, '', page.path + search);
+    return route;
   }
-  if (route.name === 'routine') {
-    document.title = 'Daily Routine — Fernvow';
-    return;
+  return parsePath(pathname.replace(/\/index\.html$/, '/'));
+}
+
+function updateDocumentMetadata(route) {
+  const page = getPageMetadata(route);
+  document.title = page.title;
+  document.querySelector('link[rel="canonical"]').href = SITE_ORIGIN + page.path;
+  for (const [key, value] of Object.entries(getPageTags(page))) {
+    const attribute = key.startsWith('og:') ? 'property' : 'name';
+    document.querySelector(`meta[${attribute}="${key}"]`).content = value;
   }
-  if (route.name === 'philosophy' || route.name === 'brand') {
-    document.title = 'About Fernvow';
-    return;
-  }
-  if (route.name === 'policies') {
-    document.title = 'Care & Policies — Fernvow';
-    return;
-  }
-  if (route.name === 'checkout') {
-    document.title = 'Checkout — Fernvow';
-    return;
-  }
-  document.title = 'Fernvow — Calm Daily Skincare';
+  document.getElementById('product-structured-data').textContent = JSON.stringify(page.structuredData || {});
 }
 
 function announce(message) {
@@ -229,7 +226,7 @@ function renderRoute() {
   const footerRoot = document.getElementById('footer-root');
   if (!headerRoot || !mainEl || !footerRoot) return;
 
-  updateDocumentTitle(state.route);
+  updateDocumentMetadata(state.route);
 
   headerRoot.innerHTML = renderHeader({
     route: state.route,
@@ -423,12 +420,25 @@ function scrollToCollection({ focusTab = false, behavior = 'instant' } = {}) {
   section.scrollIntoView({ block: 'start', behavior });
 }
 
+function followStorefrontLink(event, target) {
+  const link = target.closest('a[href^="/"]');
+  if (!link || link.target || link.hasAttribute('download') || event.defaultPrevented ||
+      event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+  const url = new URL(link.href);
+  if (url.origin !== window.location.origin) return false;
+  event.preventDefault();
+  if (url.href !== window.location.href) window.history.pushState(null, '', url);
+  handleLocationChange();
+  return true;
+}
+
 document.addEventListener('click', (event) => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
 
   const actionEl = target.closest('[data-action]');
   const modalPanel = target.closest('[data-stop-propagation]');
+  if (followStorefrontLink(event, target)) return;
   if (modalPanel && !modalPanel.contains(actionEl)) return;
   if (!actionEl) {
     if (target.closest('[data-close-mobile-menu]')) closeAllOverlays({ restoreFocus: false });
@@ -620,8 +630,8 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-window.addEventListener('hashchange', () => {
-  const nextRoute = parseHash(window.location.hash);
+function handleLocationChange() {
+  const nextRoute = readRoute();
   const routeChanged =
     nextRoute.name !== state.route.name ||
     nextRoute.slug !== state.route.slug ||
@@ -630,17 +640,19 @@ window.addEventListener('hashchange', () => {
     nextRoute.section !== state.route.section;
 
   closeAllOverlays({ restoreFocus: false });
-  state.route = nextRoute;
-
   if (routeChanged) {
+    state.route = nextRoute;
     state.pdpQty = 1;
     window.scrollTo({ top: 0, behavior: 'instant' });
+    renderRoute();
+    if (window.location.hash !== '#collection') document.getElementById('main-content').focus({ preventScroll: true });
+    checkPaymentStatus();
   }
-  renderRoute();
   if (window.location.hash === '#collection') scrollToCollection();
-  else if (routeChanged) document.getElementById('main-content').focus({ preventScroll: true });
-  if (routeChanged) checkPaymentStatus();
-});
+}
+
+window.addEventListener('hashchange', handleLocationChange);
+window.addEventListener('popstate', handleLocationChange);
 
 commerce.subscribe((nextCart) => {
   checkoutRequest = null;
@@ -657,7 +669,7 @@ commerce.subscribe((nextCart) => {
 renderRoute();
 const storeIntro = document.getElementById('store-intro');
 const opensAtCollection = window.location.hash === '#collection';
-if (state.route.name === 'checkout' || opensAtCollection) {
+if (state.route.name !== 'home' || opensAtCollection) {
   storeIntro?.remove();
 } else {
   storeIntro?.classList.add('is-ready');

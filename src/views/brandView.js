@@ -7,11 +7,11 @@ export function renderBrandView() {
         <h1 class="store-heading" id="about-title">About Fernvow</h1>
       </header>
       <div class="routine-feature brand-feature">
-        <img src="assets/photos/editorial-botanical-wall.jpg" alt="Soft fern shadows on a sunlit wall" width="896" height="1200" />
+        <img src="/assets/photos/editorial-botanical-wall.jpg" alt="Soft fern shadows on a sunlit wall" width="896" height="1200" />
         <div class="routine-feature__copy">
           <h2 class="store-heading">A little time for yourself.</h2>
           <p>Fernvow is for the few minutes you spend at the sink, when you’re getting ready in the morning or washing the day away. We make skincare that feels good to put on and is easy to make part of a routine.</p>
-          <a href="#/routine" class="btn btn--fern">See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
+          <a href="/routine" class="btn btn--fern">See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
         </div>
       </div>
       <section class="brand-approach" aria-labelledby="brand-approach-title">
@@ -32,7 +32,7 @@ export function renderBrandView() {
           <h2 class="store-heading" id="brand-collection-title">Our first collection.</h2>
           <p>We’re starting with a cleansing foam, a hydrating toner, and a daily face moisturizer. As Fernvow grows, we plan to bring the same care to more products you can reach for every day.</p>
         </div>
-        <a class="btn btn--fern" href="#collection">Shop the collection ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
+        <a class="btn btn--fern" href="/#collection">Shop the collection ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
       </section>
     </section>
   `;

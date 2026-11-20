@@ -33,7 +33,7 @@ export function renderPoliciesView({ section = 'shipping', checkoutEnabled = fal
           ${POLICY_TABS.map(
             (tab) => `
             <a
-              href="#/policies/${escapeHtml(tab.id)}"
+              href="/policies/${escapeHtml(tab.id)}"
               class="policies-nav__link ${activeId === tab.id ? 'is-active' : ''}"
               ${activeId === tab.id ? 'aria-current="page"' : ''}
             >

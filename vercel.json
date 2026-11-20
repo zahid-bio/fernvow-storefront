@@ -3,6 +3,12 @@
   "framework": null,
   "buildCommand": "python3 scripts/build_static.py",
   "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/product/:slug", "destination": "/product/:slug/index.html" },
+    { "source": "/policies/:section", "destination": "/policies/:section/index.html" },
+    { "source": "/routine", "destination": "/routine/index.html" },
+    { "source": "/philosophy", "destination": "/philosophy/index.html" }
+  ],
   "functions": {
     "api/**/*.py": {
       "excludeFiles": "{assets/**,dist/**,docs/**,dribbble_references/**,scripts/test_*.py}"

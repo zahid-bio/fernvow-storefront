@@ -23,7 +23,7 @@ export function renderCheckoutResultView({ status, reference }) {
       ${reference ? `<p class="checkout-result__reference">Reference ${escapeHtml(reference)}</p>` : ''}
       ${retry ? '<button type="button" class="btn btn--fern" data-action="check-payment-status">Check payment status</button>' : ''}
       ${reopen ? '<button type="button" class="btn btn--fern" data-action="open-cart">Open bag</button>' : ''}
-      <a href="#/" class="btn btn--outline">Keep shopping</a>
+      <a href="/" class="btn btn--outline">Keep shopping</a>
     </section>
   `;
 }
