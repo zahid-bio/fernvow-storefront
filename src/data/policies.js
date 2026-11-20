@@ -9,7 +9,7 @@ export const POLICIES = {
     sections: [
       {
         heading: 'Service Region',
-        body: 'Fernvow ships across the contiguous United States and eligible US territories using domestic ground and priority carriers.',
+        body: 'Fernvow ships to eligible U.S. addresses. Standard shipping depends on the packed weight of your order. Your rate is shown in the bag and before you pay.',
       },
       {
         heading: 'Processing & Transit Windows',

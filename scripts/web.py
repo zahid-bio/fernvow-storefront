@@ -13,9 +13,9 @@ from urllib.parse import urlsplit
 from wsgiref.util import FileWrapper
 
 if __package__:
-    from .checkout import Checkout, CheckoutError
+    from .checkout import Checkout, CheckoutError, public_shipping_settings
 else:
-    from checkout import Checkout, CheckoutError
+    from checkout import Checkout, CheckoutError, public_shipping_settings
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_PAGE = re.compile(r"(?:product|policies)/[a-z0-9-]+|routine|philosophy")
@@ -78,7 +78,7 @@ def checkout_api(checkout, environ, start_response):
     if path == "/api/checkout/methods" and method == "GET":
         settings = {"enabled": checkout.enabled}
         if checkout.enabled:
-            settings.update(shippingCents=checkout.shipping, freeShippingMinimumCents=checkout.free_shipping_minimum)
+            settings["shipping"] = public_shipping_settings()
         return json_response(start_response, 200, settings)
 
     try:

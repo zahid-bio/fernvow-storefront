@@ -21,6 +21,20 @@ CATALOG = {
     "the-daily-duo": ("The Daily Duo", 6495, ("A5852", "S0001")),
     "the-daily-trio": ("The Daily Trio", 8995, ("A5852", "A5805", "S0001")),
 }
+# Upper end of Selfnamed's published packaged-weight ranges for these sizes.
+SKU_WEIGHT_GRAMS = {"A5852": 300, "A5805": 300, "S0001": 150}
+# Maximum package weight and customer charge in cents. The U.S. supplier
+# rates are weight-based. Round up to cover processing on the shipping charge.
+US_STANDARD_SHIPPING = (
+    (500, 895),
+    (1000, 1095),
+    (2000, 1095),
+    (3000, 1495),
+    (5000, 1995),
+    (10000, 5995),
+    (30000, 9395),
+    (50000, 16195),
+)
 REFERENCE = re.compile(r"[a-f0-9]{32}\Z")
 SESSION_ID = re.compile(r"cs_live_[A-Za-z0-9_]{16,248}\Z")
 STRIPE_URL = "https://api.stripe.com/v1"
@@ -76,13 +90,25 @@ def resolve_cart(body):
     return dict(sorted(quantities.items())), subtotal
 
 
+def standard_shipping_cents(weight_grams):
+    for maximum, cents in US_STANDARD_SHIPPING:
+        if weight_grams <= maximum:
+            return cents
+    raise CheckoutError(400, "This bag is too large for online shipping. Contact care@fernvow.com.")
+
+
+def public_shipping_settings():
+    return {
+        "weightsGrams": {slug: sum(SKU_WEIGHT_GRAMS[sku] for sku in entry[2]) for slug, entry in CATALOG.items()},
+        "tiers": [{"maxGrams": maximum, "cents": cents} for maximum, cents in US_STANDARD_SHIPPING],
+    }
+
+
 class Checkout:
-    def __init__(self, origin, *, stripe_key="", stripe_webhook_secret="", shipping=0, free_shipping_minimum=None):
+    def __init__(self, origin, *, stripe_key="", stripe_webhook_secret=""):
         self.origin = origin
         self.stripe_key = stripe_key
         self.stripe_webhook_secret = stripe_webhook_secret
-        self.shipping = shipping
-        self.free_shipping_minimum = free_shipping_minimum
 
         if not self.stripe_key:
             return
@@ -105,19 +131,8 @@ class Checkout:
             raise ValueError("Live checkout requires a Stripe key and webhook signing secret.")
         if not re.fullmatch(r"acct_[A-Za-z0-9]+", env.get("STRIPE_ACCOUNT_ID", "")):
             raise ValueError("Set STRIPE_ACCOUNT_ID to the Fernvow live account ID.")
-        if not env.get("FERNVOW_SHIPPING_CENTS", "").strip():
-            raise ValueError("Set the actual shipping rate before enabling live checkout.")
-
-        shipping = int(env.get("FERNVOW_SHIPPING_CENTS") or "0")
-        if not 0 <= shipping <= 100000:
-            raise ValueError("Invalid shipping amount.")
-        minimum = env.get("FERNVOW_FREE_SHIPPING_MINIMUM_CENTS", "").strip()
-        free_shipping_minimum = int(minimum) if minimum else None
-        if free_shipping_minimum is not None and free_shipping_minimum <= 0:
-            raise ValueError("Invalid free shipping minimum.")
         checkout = cls(
             origin, stripe_key=stripe_key, stripe_webhook_secret=webhook_secret,
-            shipping=shipping, free_shipping_minimum=free_shipping_minimum,
         )
         account = checkout.stripe("/account")
         if account.get("id") != env["STRIPE_ACCOUNT_ID"]:
@@ -137,13 +152,11 @@ class Checkout:
         return request_json(STRIPE_URL + path, headers=headers, form=form)
 
     def create_stripe_session(self, reference, quantities, subtotal):
-        shipping = self.shipping
-        if self.free_shipping_minimum is not None and subtotal >= self.free_shipping_minimum:
-            shipping = 0
         fulfillment = {}
         for slug, quantity in quantities.items():
             for sku in CATALOG[slug][2]:
                 fulfillment[sku] = fulfillment.get(sku, 0) + quantity
+        shipping = standard_shipping_cents(sum(SKU_WEIGHT_GRAMS[sku] * count for sku, count in fulfillment.items()))
         sku_quantities = json.dumps(fulfillment, separators=(",", ":"), sort_keys=True)
         success = f"{self.origin}/?order={reference}&session_id={{CHECKOUT_SESSION_ID}}"
         cancel = f"{self.origin}/?checkout=cancelled"

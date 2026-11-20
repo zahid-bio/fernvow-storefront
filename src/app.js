@@ -676,10 +676,10 @@ if (state.route.name !== 'home' || opensAtCollection) {
 }
 if (opensAtCollection) scrollToCollection();
 checkPaymentStatus();
-getCheckoutSettings().then(({ enabled, shippingCents, freeShippingMinimumCents }) => {
+getCheckoutSettings().then(({ enabled, shipping }) => {
   if (enabled !== true) return;
   state.checkoutEnabled = true;
-  if (Number.isInteger(shippingCents)) state.shipping = { shippingCents, freeShippingMinimumCents };
+  if (shipping?.weightsGrams && Array.isArray(shipping.tiers)) state.shipping = shipping;
   updateQuickCheckout();
   if (state.isCartOpen) {
     renderOverlays(false);

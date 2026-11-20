@@ -5,16 +5,9 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
   if (!isOpen) return '';
 
   const items = cart?.items || [];
-  const subtotalCents = Math.round((cart?.subtotal || 0) * 100);
-  const freeShippingMinimum = shipping?.freeShippingMinimumCents;
-  const shippingCents = freeShippingMinimum && subtotalCents >= freeShippingMinimum ? 0 : shipping?.shippingCents;
-  let shippingNote = 'Shipping and tax are shown at checkout.';
-  if (shipping) {
-    shippingNote = 'Tax calculated at checkout.';
-    if (shippingCents && freeShippingMinimum) {
-      shippingNote += ` Free US shipping on orders of ${formatMoney(freeShippingMinimum / 100)} or more.`;
-    }
-  }
+  const weight = shipping && items.reduce((grams, item) => grams + shipping.weightsGrams[item.slug] * item.quantity, 0);
+  const shippingCents = shipping?.tiers.find((tier) => weight <= tier.maxGrams)?.cents;
+  const hasShippingQuote = checkoutEnabled && Number.isInteger(shippingCents);
 
   return `
     <div class="drawer-backdrop overlay-backdrop" data-action="close-cart"></div>
@@ -67,13 +60,13 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
           <div class="cart-summary-row cart-summary-row--total">
             <span>Subtotal</span><strong>${formatMoney(cart.subtotal)}</strong>
           </div>
-          ${checkoutEnabled && shipping ? `
+          ${hasShippingQuote ? `
             <div class="cart-summary-row">
-              <span>Standard US shipping</span><strong>${shippingCents === 0 ? 'Free' : formatMoney(shippingCents / 100)}</strong>
+              <span>Standard US shipping</span><strong>${formatMoney(shippingCents / 100)}</strong>
             </div>
           ` : ''}
           ${checkoutEnabled ? `
-            <p class="cart-drawer__note">${shippingNote}</p>
+            <p class="cart-drawer__note">${hasShippingQuote ? 'Tax calculated at checkout.' : 'Shipping and tax are shown at checkout.'}</p>
             <button type="button" class="btn btn--fern btn--full" data-action="prepare-checkout"
               aria-disabled="${String(isCheckingOut)}">
               ${isCheckingOut ? 'Opening checkout…' : 'Continue to secure checkout'}

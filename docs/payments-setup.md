@@ -18,13 +18,11 @@ Fernvow uses Stripe-hosted Checkout for cards and eligible wallets. The server b
    | Setting | Value |
    | --- | --- |
    | `FERNVOW_PUBLIC_ORIGIN` | The public HTTPS origin, with no route suffix |
-   | `FERNVOW_SHIPPING_CENTS` | The approved flat rate in cents, or `0` for free shipping |
-   | `FERNVOW_FREE_SHIPPING_MINIMUM_CENTS` | Optional merchandise subtotal in cents that qualifies for free shipping |
    | `STRIPE_ACCOUNT_ID` | Fernvow’s live merchant account ID from Stripe |
    | `STRIPE_SECRET_KEY` | A live Stripe key. If restricted, allow account reads and Checkout Session writes and reads |
    | `STRIPE_WEBHOOK_SECRET` | The live endpoint’s signing secret |
 
-4. Confirm that a single product and The Daily Duo show the correct total in Stripe Checkout, including shipping and tax. Check Apple Pay with an eligible Apple Wallet device and Google Pay with an eligible Google Wallet device. Use an owner-authorized order to verify the return page, webhook delivery, order record, receipt, fulfillment and refund.
+4. Confirm that a single product, The Daily Duo and The Daily Trio show the correct total in Stripe Checkout, including shipping and tax. The server calculates U.S. standard shipping from the fulfillment SKUs, using the maximum typical packaged weight for each bottle and the rate table in `scripts/checkout.py`. Reconcile the estimates against actual supplier invoices. [Selfnamed shipping rates and weights](https://help.selfnamed.com/en/articles/10009962-what-is-selfnamed-s-shipping-time-and-costs)
 5. Reconcile and ship from verified paid orders in Stripe. Checkout stores the order reference, totals, and Selfnamed SKU quantities on the Stripe session. It also stores the order reference and SKU quantities on the payment. The webhook verifies payment and marks the Stripe session. For The Daily Duo, Stripe charges the bundle price and the metadata lists both SKUs. Retrieve shipping details in Stripe and submit those orders to Selfnamed manually. [Stripe fulfillment](https://docs.stripe.com/checkout/fulfillment)
 
 ## PayPal

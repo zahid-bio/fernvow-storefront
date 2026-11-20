@@ -7,14 +7,14 @@ import time
 import unittest
 from unittest.mock import patch
 
-from checkout import Checkout, CheckoutError
+from checkout import Checkout, CheckoutError, public_shipping_settings, standard_shipping_cents
 
 
 class CheckoutTests(unittest.TestCase):
     def setUp(self):
         self.checkout = Checkout(
             "https://store.example", stripe_key="sk_live_fixture",
-            stripe_webhook_secret="whsec_fixture", shipping=595,
+            stripe_webhook_secret="whsec_fixture",
         )
         self.reference = "f" * 32
         self.cart = {
@@ -45,17 +45,18 @@ class CheckoutTests(unittest.TestCase):
         self.assertTrue(form["success_url"].endswith("&session_id={CHECKOUT_SESSION_ID}"))
         self.assertEqual(form["line_items[1][price_data][unit_amount]"], 6495)
         self.assertEqual(form["line_items[1][quantity]"], 2)
-        self.assertEqual(form["shipping_options[0][shipping_rate_data][fixed_amount][amount]"], 595)
+        self.assertEqual(form["shipping_options[0][shipping_rate_data][fixed_amount][amount]"], 1095)
         self.assertEqual(form["automatic_tax[enabled]"], "true")
         self.assertNotIn("payment_method_types[0]", form)
         self.assertEqual(json.loads(form["payment_intent_data[metadata][fernvow_skus]"]), {"A5852": 3, "S0001": 2})
 
-    def test_free_shipping_uses_validated_merchandise_subtotal(self):
-        self.checkout.free_shipping_minimum = 6000
+    def test_checkout_charges_by_packed_weight(self):
         with patch.object(self.checkout, "stripe", return_value={"url": self.checkout_url}) as stripe:
             for slug, quantity, subtotal, shipping in (
-                ("hydrating-toner", 2, 5990, 595),
-                ("the-daily-duo", 1, 6495, 0),
+                ("hydrating-toner", 1, 2995, 895),
+                ("hydrating-toner", 2, 5990, 1095),
+                ("the-daily-duo", 1, 6495, 895),
+                ("the-daily-trio", 1, 8995, 1095),
             ):
                 with self.subTest(subtotal=subtotal):
                     self.checkout.create({
@@ -67,8 +68,16 @@ class CheckoutTests(unittest.TestCase):
                     self.assertEqual(form["shipping_options[0][shipping_rate_data][fixed_amount][amount]"], shipping)
                     self.assertEqual(form["metadata[fernvow_shipping]"], shipping)
 
+    def test_public_shipping_tiers_match_server_quotes(self):
+        settings = public_shipping_settings()
+        self.assertEqual(settings["weightsGrams"]["the-daily-trio"], 750)
+        for tier in settings["tiers"]:
+            self.assertEqual(standard_shipping_cents(tier["maxGrams"]), tier["cents"])
+        self.assertEqual(standard_shipping_cents(501), 1095)
+        with self.assertRaisesRegex(CheckoutError, "too large"):
+            standard_shipping_cents(50001)
+
     def test_trio_price_and_fulfillment_with_overlapping_items(self):
-        self.checkout.free_shipping_minimum = 6000
         cart = {
             "reference": self.reference,
             "items": [
@@ -84,7 +93,7 @@ class CheckoutTests(unittest.TestCase):
         self.assertEqual(form["line_items[2][price_data][product_data][name]"], "The Daily Trio")
         self.assertEqual(form["line_items[2][price_data][unit_amount]"], 8995)
         self.assertEqual(form["line_items[2][quantity]"], 2)
-        self.assertEqual(form["metadata[fernvow_shipping]"], 0)
+        self.assertEqual(form["metadata[fernvow_shipping]"], 1495)
         expected = {"A5852": 3, "A5805": 3, "S0001": 3}
         self.assertEqual(json.loads(form["metadata[fernvow_skus]"]), expected)
         self.assertEqual(json.loads(form["payment_intent_data[metadata][fernvow_skus]"]), expected)
@@ -123,7 +132,7 @@ class CheckoutTests(unittest.TestCase):
 
     def test_live_startup_rejects_a_key_for_another_merchant(self):
         env = {
-            "FERNVOW_CHECKOUT_MODE": "live", "FERNVOW_SHIPPING_CENTS": "595",
+            "FERNVOW_CHECKOUT_MODE": "live",
             "STRIPE_ACCOUNT_ID": "acct_expected", "STRIPE_SECRET_KEY": "sk_live_fixture",
             "STRIPE_WEBHOOK_SECRET": "whsec_fixture",
         }
