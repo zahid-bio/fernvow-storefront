@@ -4,11 +4,22 @@
 
 The bottle wraps and moisturizer carton dieline in `assets/packaging` match the designs saved in Selfnamed. The six front panels and proof sheet show the whole design family. Selfnamed offers a printable carton for the moisturizer and a bottle label for each formula. The cleanser and toner carton fronts are concept artwork.
 
-The three individual storefront photos use built-in ImageGen with the Selfnamed packshots as packaging references and The Daily Duo photo as the lighting and styling reference. The collection carousel uses the earlier editorial photos, with 1600 × 640 desktop panels and 720 × 720 mobile panels.
+The three individual storefront photos use built-in ImageGen with the Selfnamed packshots as packaging references and The Daily Duo photo as the lighting and styling reference.
 
 The individual-photo prompts asked for readable label text, exact bottle and closure shapes, and full product framing in a portrait 4:5 crop. They pair the cleansing foam with peach-blush plaster, the moisturizer and its carton with champagne limestone, and the toner with sage plaster. All three use angled window light, textured stone, and soft fill on the labels to match The Daily Duo.
 
 The packaging prompts asked ImageGen to flatten the approved reference into six print panels, preserve the high-contrast wordmark and detailed ferns and flowers, and keep each formula's color and exact label text. The bottle artwork was color-corrected to neutral white and fitted to each supplier wrap. The photo prompts asked for the exact white bottles, closures, and artwork in sunlit stone and plaster settings, with a transparent background for the homepage cutout.
+
+## Current collection carousel
+
+The carousel scenes use built-in ImageGen with the original editorial panels and the current package photography as references. The prompts ask for a centered subject, an uninterrupted panoramic surround, and quiet space beneath the subject for the moving category names. The desktop files are 1600 × 640 and their mobile crops are 720 × 720.
+
+- **All formulas.** The three current bottles in a sunlit apricot plaster niche above a rose travertine shelf.
+- **Cleansing.** Airy foam in blush ceramic with water beads and a fold of linen.
+- **Toning.** Ripples in handblown glass casting light onto sage stone.
+- **Moisturizing.** A sweep of white cream on a rounded ceramic tile under a curved pool of light.
+- **The Daily Duo.** The cleanser and moisturizer on stepped stone with warm plaster and oatmeal linen.
+- **Fragrance-free.** The toner and moisturizer on pale stone with olive plaster and folded cotton.
 
 ## Archive
 
@@ -38,7 +49,7 @@ The four product prompts start with this direction.
 - `the-daily-duo-photo.webp` uses `product-duo-studio.jpg` as its reference. Exactly two products. The tall broad pump on the left is labeled “fernvow”, “Daily Cleansing Foam”, “150 mL”. The short slim airless pump on the right is labeled “fernvow”, “Daily Face Moisturizer”, “Fragrance Free”, “50 mL”.
 - `hero-cleanser-photo.webp` uses `hero-vanity-editorial.jpg` as its reference. Rephotograph the supplied Fernvow Daily Cleansing Foam for the product side of a premium coral skincare homepage. Use the supplied photo as a packaging reference. Keep one matte ivory foamer, the same cream label, fern mark, and the exact visible text “fernvow”, “Daily Cleansing Foam”, “150 mL”. New scene: the bottle and a small warm-white ceramic dish of cleansing foam on pale coral stone, dusty-coral limewash backdrop, soft afternoon fern shadows, a few real droplets. Use a nearly square portrait 4:5 crop composition. Group the bottle and dish mostly around the central 55% of the frame, with the bottle centered and entirely within the central 65% of height so all packaging fits in a wide responsive crop, leave clean space near the bottom-left for a website price overlay. Photograph real materials and precise shadows, no typography outside the package, no border, no collage.
 
-## Responsive collection photography
+## Earlier responsive collection photography
 
 The built-in ImageGen tool generated a new panoramic composition for each collection. Each image has a 1600 × 640 wide WebP and a separately framed 720 × 720 mobile WebP. The browser selects the appropriate file at the 640px breakpoint.
 
