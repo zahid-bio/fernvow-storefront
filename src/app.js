@@ -152,7 +152,7 @@ function renderOverlays(animateIn = true) {
       cart: state.cart,
       isCheckingOut: Boolean(checkoutRequest),
       checkoutMessage: state.checkoutMessage,
-      preview: !state.checkoutEnabled,
+      checkoutEnabled: state.checkoutEnabled,
       shipping: state.shipping,
     }),
     renderSearchModal({ isOpen: state.isSearchOpen, query: state.searchQuery }),
@@ -198,7 +198,7 @@ function renderActiveViewHtml() {
     case 'policies':
       return renderPoliciesView({
         section: state.route.section,
-        preview: !state.checkoutEnabled,
+        checkoutEnabled: state.checkoutEnabled,
       });
     case 'checkout':
       return renderCheckoutResultView(state.route.reference === 'cancelled'
@@ -349,14 +349,8 @@ function bindCollectionControls(explorer) {
 }
 
 async function startCheckout() {
-  if (!state.cart.itemCount || checkoutRequest) return;
+  if (!state.checkoutEnabled || !state.cart.itemCount || checkoutRequest) return;
   const button = '[data-action="prepare-checkout"]';
-  if (!state.checkoutEnabled) {
-    state.checkoutMessage = 'Your items will still be in your bag when you return.';
-    renderOverlays(false);
-    focusElementSoon(button);
-    return;
-  }
 
   const request = {};
   const cart = state.cart;

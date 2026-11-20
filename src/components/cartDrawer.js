@@ -1,15 +1,15 @@
 import { formatMoney } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from './header.js';
 
-export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, preview, shipping }) {
+export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, checkoutEnabled, shipping }) {
   if (!isOpen) return '';
 
   const items = cart?.items || [];
   const subtotalCents = Math.round((cart?.subtotal || 0) * 100);
   const freeShippingMinimum = shipping?.freeShippingMinimumCents;
   const shippingCents = freeShippingMinimum && subtotalCents >= freeShippingMinimum ? 0 : shipping?.shippingCents;
-  let shippingNote = preview ? 'Store preview. Orders are currently closed.' : 'Shipping and tax are shown at checkout.';
-  if (!preview && shipping) {
+  let shippingNote = 'Shipping and tax are shown at checkout.';
+  if (shipping) {
     shippingNote = 'Tax calculated at checkout.';
     if (shippingCents && freeShippingMinimum) {
       shippingNote += ` Free US shipping on orders of ${formatMoney(freeShippingMinimum / 100)} or more.`;
@@ -67,20 +67,25 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
           <div class="cart-summary-row cart-summary-row--total">
             <span>Subtotal</span><strong>${formatMoney(cart.subtotal)}</strong>
           </div>
-          ${!preview && shipping ? `
+          ${checkoutEnabled && shipping ? `
             <div class="cart-summary-row">
               <span>Standard US shipping</span><strong>${shippingCents === 0 ? 'Free' : formatMoney(shippingCents / 100)}</strong>
             </div>
           ` : ''}
-          <p class="cart-drawer__note">${shippingNote}</p>
-          <button type="button" class="btn btn--fern btn--full" data-action="prepare-checkout"
-            aria-disabled="${String(isCheckingOut)}">
-            ${isCheckingOut ? 'Opening checkout…' : preview ? 'Preview checkout' : 'Continue to secure checkout'}
-            ${isCheckingOut ? '' : iconSvg('icon-arrow-right', 'icon--sm')}
-          </button>
-          ${preview ? '' : '<p class="cart-drawer__note">Cards and eligible digital wallets through Stripe.</p>'}
-          ${checkoutMessage ? `<p class="cart-checkout-status" role="status">${escapeHtml(checkoutMessage)}</p>` : ''}
-          <button type="button" class="cart-drawer__continue" data-action="close-cart">Keep shopping</button>
+          ${checkoutEnabled ? `
+            <p class="cart-drawer__note">${shippingNote}</p>
+            <button type="button" class="btn btn--fern btn--full" data-action="prepare-checkout"
+              aria-disabled="${String(isCheckingOut)}">
+              ${isCheckingOut ? 'Opening checkout…' : 'Continue to secure checkout'}
+              ${isCheckingOut ? '' : iconSvg('icon-arrow-right', 'icon--sm')}
+            </button>
+            <p class="cart-drawer__note">Cards and eligible digital wallets through Stripe.</p>
+            ${checkoutMessage ? `<p class="cart-checkout-status" role="status">${escapeHtml(checkoutMessage)}</p>` : ''}
+            <button type="button" class="cart-drawer__continue" data-action="close-cart">Keep shopping</button>
+          ` : `
+            <p class="cart-drawer__note">Online orders aren’t open yet. You can save items in your bag for later.</p>
+            <button type="button" class="btn btn--fern btn--full" data-action="close-cart">Keep browsing</button>
+          `}
         </div>
       ` : ''}
     </aside>
