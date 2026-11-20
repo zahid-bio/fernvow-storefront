@@ -8,7 +8,7 @@ A skincare storefront with a six-category catalog, product details, photo galler
 python3 scripts/dev_server.py
 ```
 
-Open [the local storefront](http://127.0.0.1:4173). Set `PORT=8080` to select a different port. A static host can serve the preview with `index.html` at the site root. Checkout requires the Python WSGI app. Navigation uses hash routes.
+Open [the local storefront](http://127.0.0.1:4173). Set `PORT=8080` to select a different port. The Vercel configuration builds the public storefront in `dist/` and serves the checkout through Python functions. Navigation uses hash routes.
 
 ## Storefront files
 

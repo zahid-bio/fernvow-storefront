@@ -24,8 +24,10 @@ import { renderCheckoutResultView } from './views/checkoutResultView.js';
 const commerce = createCommerceClient();
 const returnParams = new URLSearchParams(window.location.search);
 const orderReference = returnParams.get('order');
-if (/^[a-f0-9]{32}$/.test(orderReference || '')) {
-  window.history.replaceState(null, '', `/#/checkout/${orderReference}`);
+const checkoutSession = returnParams.get('session_id');
+const checkoutSessionPattern = /^cs_live_[A-Za-z0-9_]{16,248}$/;
+if (/^[a-f0-9]{32}$/.test(orderReference || '') && checkoutSessionPattern.test(checkoutSession || '')) {
+  window.history.replaceState(null, '', `/#/checkout/${orderReference}/${checkoutSession}`);
 } else if (returnParams.get('checkout') === 'cancelled') {
   window.history.replaceState(null, '', '/#/checkout/cancelled');
 }
@@ -66,8 +68,11 @@ function parseHash(rawHash) {
   if (parts[0] === 'product' && parts[1]) {
     return { name: 'product', slug: decode(parts[1]) };
   }
-  if (parts[0] === 'checkout' && /^(?:[a-f0-9]{32}|cancelled)$/.test(parts[1] || '')) {
-    return { name: 'checkout', reference: parts[1] };
+  if (parts[0] === 'checkout') {
+    if (parts[1] === 'cancelled') return { name: 'checkout', reference: 'cancelled' };
+    if (/^[a-f0-9]{32}$/.test(parts[1] || '') && checkoutSessionPattern.test(parts[2] || '')) {
+      return { name: 'checkout', reference: parts[1], sessionId: parts[2] };
+    }
   }
   if (parts[0] === 'routine') {
     return { name: 'routine' };
@@ -383,7 +388,7 @@ async function checkPaymentStatus() {
   renderRoute();
   document.getElementById('main-content').focus({ preventScroll: true });
   try {
-    const result = await getCheckoutResult(route.reference, commerce);
+    const result = await getCheckoutResult(route, commerce);
     if (state.route !== route) return;
     state.checkoutResult = result;
   } catch {
@@ -606,6 +611,7 @@ window.addEventListener('hashchange', () => {
     nextRoute.name !== state.route.name ||
     nextRoute.slug !== state.route.slug ||
     nextRoute.reference !== state.route.reference ||
+    nextRoute.sessionId !== state.route.sessionId ||
     nextRoute.section !== state.route.section;
 
   closeAllOverlays({ restoreFocus: false });

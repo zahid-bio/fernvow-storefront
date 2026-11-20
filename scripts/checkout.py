@@ -7,11 +7,10 @@ import hmac
 import json
 import os
 import re
-import sqlite3
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
-from contextlib import closing
 
 # Keep the display catalog in src/data/catalog.js in sync. The client subtotal
 # is checked for stale pricing and is never used to charge a customer.
@@ -22,6 +21,7 @@ CATALOG = {
     "the-daily-duo": ("The Daily Duo", 6495, ("A5852", "S0001")),
 }
 REFERENCE = re.compile(r"[a-f0-9]{32}\Z")
+SESSION_ID = re.compile(r"cs_live_[A-Za-z0-9_]{16,248}\Z")
 STRIPE_URL = "https://api.stripe.com/v1"
 
 
@@ -43,6 +43,12 @@ def request_json(url, *, headers, form=None):
     try:
         with urllib.request.urlopen(request, timeout=15) as response:
             return json.load(response)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            raise CheckoutError(404, "Checkout could not be found.") from None
+        if error.code == 409:
+            raise CheckoutError(502, "Checkout is opening. Please try again.") from None
+        raise CheckoutError(502, "The payment provider is unavailable. Please try again.") from None
     except (OSError, ValueError):
         raise CheckoutError(502, "The payment provider is unavailable. Please try again.") from None
 
@@ -70,9 +76,8 @@ def resolve_cart(body):
 
 
 class Checkout:
-    def __init__(self, origin, database, *, stripe_key="", stripe_webhook_secret="", shipping=0):
+    def __init__(self, origin, *, stripe_key="", stripe_webhook_secret="", shipping=0):
         self.origin = origin
-        self.database = database
         self.stripe_key = stripe_key
         self.stripe_webhook_secret = stripe_webhook_secret
         self.shipping = shipping
@@ -82,28 +87,12 @@ class Checkout:
         if not self.stripe_key.startswith(("sk_live_", "rk_live_")):
             raise ValueError("Live checkout requires a live Stripe key.")
 
-        database.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        with closing(self.connect()) as db, db:
-            db.execute("""
-                CREATE TABLE IF NOT EXISTS checkout_orders (
-                    reference TEXT PRIMARY KEY,
-                    cart TEXT NOT NULL,
-                    subtotal INTEGER NOT NULL,
-                    shipping INTEGER NOT NULL,
-                    fulfillment TEXT NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    provider_id TEXT UNIQUE,
-                    checkout_url TEXT,
-                    paid_at INTEGER
-                )
-            """)
-
     @classmethod
-    def from_environment(cls, origin, database):
+    def from_environment(cls, origin):
         env = os.environ
         mode = env.get("FERNVOW_CHECKOUT_MODE", "preview")
         if mode == "preview":
-            return cls(origin, database)
+            return cls(origin)
         if mode != "live":
             raise ValueError("FERNVOW_CHECKOUT_MODE must be preview or live.")
         if urllib.parse.urlsplit(origin).scheme != "https":
@@ -120,7 +109,7 @@ class Checkout:
         shipping = int(env.get("FERNVOW_SHIPPING_CENTS") or "0")
         if not 0 <= shipping <= 100000:
             raise ValueError("Invalid shipping amount.")
-        checkout = cls(origin, database, stripe_key=stripe_key, stripe_webhook_secret=webhook_secret, shipping=shipping)
+        checkout = cls(origin, stripe_key=stripe_key, stripe_webhook_secret=webhook_secret, shipping=shipping)
         account = checkout.stripe("/account")
         if account.get("id") != env["STRIPE_ACCOUNT_ID"]:
             raise ValueError("The Stripe key belongs to a different merchant account.")
@@ -132,35 +121,38 @@ class Checkout:
     def enabled(self):
         return bool(self.stripe_key)
 
-    def connect(self):
-        connection = sqlite3.connect(self.database)
-        connection.row_factory = sqlite3.Row
-        return connection
-
     def stripe(self, path, form=None, reference=None):
         headers = {"Authorization": f"Bearer {self.stripe_key}", "Stripe-Version": "2026-10-28.endive"}
         if reference:
             headers["Idempotency-Key"] = reference
         return request_json(STRIPE_URL + path, headers=headers, form=form)
 
-    def create_stripe_session(self, order, quantities):
-        reference = order["reference"]
-        success = f"{self.origin}/?order={reference}"
+    def create_stripe_session(self, reference, quantities, subtotal):
+        fulfillment = {}
+        for slug, quantity in quantities.items():
+            for sku in CATALOG[slug][2]:
+                fulfillment[sku] = fulfillment.get(sku, 0) + quantity
+        sku_quantities = json.dumps(fulfillment, separators=(",", ":"), sort_keys=True)
+        success = f"{self.origin}/?order={reference}&session_id={{CHECKOUT_SESSION_ID}}"
         cancel = f"{self.origin}/?checkout=cancelled"
-        shipping = order["shipping"]
         form = {
             "mode": "payment",
             "success_url": success,
             "cancel_url": cancel,
             "client_reference_id": reference,
+            "metadata[fernvow_order]": reference,
+            "metadata[fernvow_subtotal]": subtotal,
+            "metadata[fernvow_shipping]": self.shipping,
+            "metadata[fernvow_skus]": sku_quantities,
             "payment_intent_data[metadata][fernvow_order]": reference,
+            "payment_intent_data[metadata][fernvow_skus]": sku_quantities,
             "adaptive_pricing[enabled]": "false",
             "automatic_tax[enabled]": "true",
             "shipping_options[0][shipping_rate_data][tax_behavior]": "exclusive",
             "shipping_address_collection[allowed_countries][0]": "US",
             "shipping_options[0][shipping_rate_data][type]": "fixed_amount",
             "shipping_options[0][shipping_rate_data][display_name]": "Standard shipping",
-            "shipping_options[0][shipping_rate_data][fixed_amount][amount]": shipping,
+            "shipping_options[0][shipping_rate_data][fixed_amount][amount]": self.shipping,
             "shipping_options[0][shipping_rate_data][fixed_amount][currency]": "usd",
         }
         for index, (slug, quantity) in enumerate(quantities.items()):
@@ -173,8 +165,7 @@ class Checkout:
                 f"{prefix}[price_data][currency]": "usd",
                 f"{prefix}[price_data][tax_behavior]": "exclusive",
             })
-        session = self.stripe("/checkout/sessions", form, reference)
-        return session["id"], session["url"]
+        return self.stripe("/checkout/sessions", form, reference)
 
     def create(self, body):
         if not self.enabled:
@@ -184,74 +175,46 @@ class Checkout:
             raise CheckoutError(400, "Invalid checkout reference.")
 
         quantities, subtotal = resolve_cart(body)
-        cart = json.dumps(quantities)
-        fulfillment = {}
-        for slug, quantity in quantities.items():
-            for sku in CATALOG[slug][2]:
-                fulfillment[sku] = fulfillment.get(sku, 0) + quantity
+        session = self.create_stripe_session(reference, quantities, subtotal)
+        url = session.get("url")
+        redirect = urllib.parse.urlsplit(url) if url else None
+        if not redirect or redirect.scheme != "https" or redirect.netloc != "checkout.stripe.com":
+            raise CheckoutError(502, "The payment provider returned an invalid checkout link.")
+        return {"checkoutUrl": url, "reference": reference}
 
-        with closing(self.connect()) as db:
-            with db:
-                db.execute("""
-                    INSERT OR IGNORE INTO checkout_orders
-                    (reference, cart, subtotal, shipping, fulfillment, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (reference, cart, subtotal, self.shipping, json.dumps(fulfillment), int(time.time())))
-            order = db.execute("SELECT * FROM checkout_orders WHERE reference = ?", (reference,)).fetchone()
-            if order["cart"] != cart or order["paid_at"]:
-                raise CheckoutError(409, "Start a new checkout from your bag.")
-            if time.time() - order["created_at"] > 1800:
-                raise CheckoutError(409, "This checkout has expired. Try again to start a new checkout.")
-            if order["checkout_url"]:
-                return {"checkoutUrl": order["checkout_url"], "reference": reference}
-
-            provider_id, url = self.create_stripe_session(order, quantities)
-            redirect = urllib.parse.urlsplit(url)
-            if redirect.scheme != "https" or redirect.netloc != "checkout.stripe.com":
-                raise CheckoutError(502, "The payment provider returned an invalid checkout link.")
-            with db:
-                db.execute("""
-                    UPDATE checkout_orders SET provider_id = ?, checkout_url = ?
-                    WHERE reference = ? AND provider_id IS NULL
-                """, (provider_id, url, reference))
-            saved = db.execute("SELECT checkout_url FROM checkout_orders WHERE reference = ?", (reference,)).fetchone()
-            return {"checkoutUrl": saved["checkout_url"], "reference": reference}
-
-    def stripe_status(self, order):
-        session = self.stripe("/checkout/sessions/" + urllib.parse.quote(order["provider_id"], safe=""))
-        if (
-            session["id"] != order["provider_id"]
-            or session["client_reference_id"] != order["reference"]
-            or session["livemode"] is not True
-            or session["currency"] != "usd"
-            or session["amount_subtotal"] != order["subtotal"]
+    def status(self, reference, session_id):
+        if not (
+            self.enabled and isinstance(reference, str) and REFERENCE.fullmatch(reference)
+            and isinstance(session_id, str) and SESSION_ID.fullmatch(session_id)
         ):
+            raise CheckoutError(404, "Checkout could not be found.")
+        session = self.stripe("/checkout/sessions/" + session_id)
+        return {"status": self.verify_session(session, reference, session_id)}
+
+    @staticmethod
+    def verify_session(session, reference, session_id):
+        metadata = session.get("metadata") or {}
+        if (
+            session.get("id") != session_id or session.get("livemode") is not True
+            or session.get("client_reference_id") != reference
+            or metadata.get("fernvow_order") != reference
+        ):
+            raise CheckoutError(404, "Checkout could not be found.")
+        subtotal = session.get("amount_subtotal")
+        if type(subtotal) is not int or session.get("currency") != "usd" or str(subtotal) != metadata.get("fernvow_subtotal"):
             raise CheckoutError(409, "The payment total could not be verified.")
-        if session["status"] == "complete" and session["payment_status"] == "paid":
-            details = session["total_details"]
-            if (details["amount_shipping"] != order["shipping"]
-                    or details["amount_discount"] != 0
-                    or session["amount_total"] != order["subtotal"] + order["shipping"] + details["amount_tax"]):
+        if session.get("status") == "complete" and session.get("payment_status") == "paid":
+            details = session.get("total_details") or {}
+            shipping, tax = details.get("amount_shipping"), details.get("amount_tax")
+            if (
+                type(shipping) is not int or type(tax) is not int
+                or str(shipping) != metadata.get("fernvow_shipping")
+                or details.get("amount_discount") != 0
+                or session.get("amount_total") != subtotal + shipping + tax
+            ):
                 raise CheckoutError(409, "The payment total could not be verified.")
             return "paid"
-        return "cancelled" if session["status"] == "expired" else "pending"
-
-    def status(self, reference):
-        if not isinstance(reference, str) or not REFERENCE.fullmatch(reference) or not self.enabled:
-            raise CheckoutError(404, "Checkout could not be found.")
-        with closing(self.connect()) as db:
-            order = db.execute("SELECT * FROM checkout_orders WHERE reference = ?", (reference,)).fetchone()
-            if not order or not order["provider_id"]:
-                raise CheckoutError(404, "Checkout could not be found.")
-            if order["paid_at"]:
-                status = "paid"
-            else:
-                status = self.stripe_status(order)
-                if status == "paid":
-                    with db:
-                        db.execute("UPDATE checkout_orders SET paid_at = ? WHERE reference = ? AND paid_at IS NULL",
-                                   (int(time.time()), reference))
-            return {"status": status}
+        return "cancelled" if session.get("status") == "expired" else "pending"
 
     def stripe_webhook(self, payload, signature):
         if not self.stripe_webhook_secret or not self.enabled:
@@ -271,11 +234,16 @@ class Checkout:
         event = json.loads(payload)
         if event.get("type") in {"checkout.session.completed", "checkout.session.async_payment_succeeded"}:
             session = event["data"]["object"]
-            with closing(self.connect()) as db:
-                order = db.execute(
-                    "SELECT reference FROM checkout_orders WHERE provider_id = ?",
-                    (session["id"],),
-                ).fetchone()
-            if order:
-                self.status(order["reference"])
+            reference = (session.get("metadata") or {}).get("fernvow_order")
+            session_id = session.get("id")
+            if (
+                isinstance(reference, str) and REFERENCE.fullmatch(reference)
+                and isinstance(session_id, str) and SESSION_ID.fullmatch(session_id)
+                and self.verify_session(session, reference, session_id) == "paid"
+            ):
+                self.stripe(
+                    "/checkout/sessions/" + session_id,
+                    {"metadata[fernvow_payment_verified]": "true"},
+                    "fernvow-verified-" + session_id,
+                )
         return {"received": True}

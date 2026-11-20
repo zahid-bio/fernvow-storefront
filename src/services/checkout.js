@@ -55,8 +55,8 @@ export function rememberCheckout(reference, cart) {
   }
 }
 
-export async function getCheckoutResult(reference, commerce) {
-  const result = await checkoutRequest('/api/checkout/status', { reference });
+export async function getCheckoutResult({ reference, sessionId }, commerce) {
+  const result = await checkoutRequest('/api/checkout/status', { reference, sessionId });
   if (result.status === 'paid') {
     try {
       const saved = JSON.parse(sessionStorage.getItem(pendingCartKey));

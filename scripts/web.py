@@ -11,7 +11,10 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from wsgiref.util import FileWrapper
 
-from checkout import Checkout, CheckoutError
+if __package__:
+    from .checkout import Checkout, CheckoutError
+else:
+    from checkout import Checkout, CheckoutError
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 RESPONSE_HEADERS = [
@@ -80,7 +83,9 @@ def checkout_api(checkout, environ, start_response):
             body = json.loads(payload)
             if not isinstance(body, dict):
                 raise CheckoutError(400, "Invalid checkout request.")
-            result = checkout.create(body) if path == "/api/checkout" else checkout.status(body.get("reference"))
+            result = checkout.create(body) if path == "/api/checkout" else checkout.status(
+                body.get("reference"), body.get("sessionId"),
+            )
         return json_response(start_response, 200, result)
     except CheckoutError as error:
         return json_response(start_response, error.status, {"message": str(error)})
@@ -96,9 +101,7 @@ def create_app(local_origin="http://127.0.0.1:4173"):
     url = urlsplit(origin)
     if url.scheme not in {"http", "https"} or not url.hostname or url.path or url.query or url.fragment or url.username:
         raise ValueError("FERNVOW_PUBLIC_ORIGIN must contain only the protocol and host.")
-    state_dir = Path(os.environ.get("FERNVOW_STATE_DIR") or ROOT_DIR / ".private")
-    database = state_dir / "checkout-live.sqlite3"
-    checkout = Checkout.from_environment(origin, database)
+    checkout = Checkout.from_environment(origin)
 
     def app(environ, start_response):
         if environ["PATH_INFO"].startswith("/api/"):
