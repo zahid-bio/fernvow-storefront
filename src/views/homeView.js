@@ -1,19 +1,19 @@
-import { PRODUCTS, formatMoney, getProductScentLabel } from '../data/catalog.js';
+import { PRODUCTS, formatMoney, getProductBySlug, getProductScentLabel } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from '../components/header.js';
 
-const COLLECTIONS = [
-  { id: 'all', label: 'All products', image: 'all' },
-  { id: 'cleanse', label: 'Cleansing', image: 'cleanse' },
-  { id: 'tone', label: 'Toning', image: 'tone' },
-  { id: 'moisturize', label: 'Moisturizing', image: 'moisturize' },
-  { id: 'fragrance-free', label: 'Fragrance-free', image: 'fragrance' },
+const TICKER_ITEMS = [
+  { id: 'cleanse', title: 'cleansing', label: 'Cleanse', image: 'cleanse' },
+  { id: 'tone', title: 'toning', label: 'Tone', image: 'tone' },
+  { id: 'all', title: 'all formulas', label: 'All', image: 'all' },
+  { id: 'moisturize', title: 'moisturizing', label: 'Moisturize', image: 'moisturize' },
+  { id: 'bundle', title: 'the duo', label: 'The Duo', image: 'duo' },
+  { id: 'trio', title: 'the trio', label: 'The Trio', image: 'trio' },
+  { id: 'fragrance-free', title: 'fragrance-free', label: 'Fragrance-free', image: 'fragrance' },
 ];
 
-const FEATURED_ORDER = { cleanse: 0, tone: 1, moisturize: 2, bundle: 3, trio: 4 };
-
 export function getAdjacentCollection(activeFilter, step) {
-  const index = COLLECTIONS.findIndex(({ id }) => id === activeFilter);
-  return COLLECTIONS[(index + step + COLLECTIONS.length) % COLLECTIONS.length];
+  const index = TICKER_ITEMS.findIndex(({ id }) => id === activeFilter);
+  return TICKER_ITEMS[(index + step + TICKER_ITEMS.length) % TICKER_ITEMS.length];
 }
 
 export function formatProductCount(count) {
@@ -25,7 +25,7 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
     <div data-collection-explorer>
       <div class="cat-stage">
         <div class="cat-stage__bgs" aria-hidden="true">
-          ${COLLECTIONS.map(({ id, image }) => `
+          ${TICKER_ITEMS.map(({ id, image }) => `
             <picture class="cat-stage__bg ${id === activeFilter ? 'is-active' : ''}" data-cat="${id}">
               <source media="(max-width: 640px)" srcset="assets/photos/ticker-${image}-mobile.webp" width="720" height="720" />
               <img src="assets/photos/ticker-${image}-wide.webp" alt="" width="1600" height="640"
@@ -33,12 +33,17 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
             </picture>
           `).join('')}
         </div>
-        <div class="collection-tabs container" role="tablist" aria-label="Skincare categories">
-          ${COLLECTIONS.map(({ id, label }) => `
-            <button type="button" role="tab" id="collection-tab-${id}" class="collection-tab"
-              data-action="set-category" data-category="${id}" aria-selected="${String(id === activeFilter)}"
-              tabindex="${id === activeFilter ? '0' : '-1'}" aria-controls="catalog-grid-slot">${label}</button>
-          `).join('')}
+        <div class="cat-ticker-viewport" role="tablist" aria-label="Skincare categories">
+          <div class="cat-ticker__track">
+            ${TICKER_ITEMS.map(({ id, title, label }) => `
+              <button type="button" role="tab" id="collection-tab-${id}" class="cat-ticker__btn"
+                data-action="set-category" data-category="${id}" aria-selected="${String(id === activeFilter)}"
+                tabindex="${id === activeFilter ? '0' : '-1'}" aria-controls="catalog-grid-slot">
+                <span class="cat-ticker__title">${title}</span>
+                <span class="cat-ticker__short" aria-hidden="true">${label}</span>
+              </button>
+            `).join('')}
+          </div>
         </div>
         <div class="cat-stage__controls" role="group" aria-label="Browse categories">
           <button type="button" class="cat-stage__arrow cat-stage__arrow--prev" data-action="step-category"
@@ -82,9 +87,6 @@ export function filterAndSortProducts(activeFilter = 'all', sortBy = 'featured')
 
   if (sortBy === 'price-asc') products.sort((a, b) => a.price - b.price);
   if (sortBy === 'price-desc') products.sort((a, b) => b.price - a.price);
-  if (sortBy === 'featured') {
-    products.sort((a, b) => (FEATURED_ORDER[a.category] ?? Infinity) - (FEATURED_ORDER[b.category] ?? Infinity));
-  }
   return products;
 }
 
@@ -123,23 +125,30 @@ export function renderHomeCatalogGrid(products) {
   `;
 }
 
+function renderHeroFeature(product, slot) {
+  return `
+    <a href="#/product/${product.slug}" class="hero-feature hero-feature--${slot}">
+      <img src="${escapeHtml(product.images.editorialImage)}" alt="" width="480" height="360" decoding="async" />
+      <span class="hero-feature__text">
+        <span>${escapeHtml(product.name)}</span>
+        <strong>${formatMoney(product.price)}</strong>
+      </span>
+      ${iconSvg('icon-arrow-up-right', 'hero-feature__arrow')}
+    </a>
+  `;
+}
+
 export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
+  const foam = getProductBySlug('daily-cleansing-foam');
+  const duo = getProductBySlug('the-daily-duo');
   const products = filterAndSortProducts(activeFilter, sortBy);
 
   return `
-    <section class="store-hero" aria-labelledby="store-title">
-      <div class="container store-hero__layout">
+    <section class="store-hero container" aria-labelledby="store-title">
+      <div class="store-hero__layout">
         <div class="store-hero__copy">
           <h1 id="store-title">Make time for <em>your skin.</em></h1>
           <p>An airy cleanse, a splash of hydration, and a soft finish.</p>
-          <div class="store-hero__actions">
-            <a href="#collection" class="btn btn--fern" data-action="scroll-collection">
-              Shop the collection ${iconSvg('icon-chevron-down', 'icon--sm')}
-            </a>
-            <a href="#/product/the-daily-trio" class="store-text-link">
-              See the Daily Trio ${iconSvg('icon-arrow-right', 'icon--sm')}
-            </a>
-          </div>
         </div>
 
         <div class="store-hero__art">
@@ -147,6 +156,19 @@ export function renderHomeView({ activeFilter = 'all', sortBy = 'featured' }) {
             alt="Fernvow moisturizer, cleanser and toner on a coral stone shelf"
             width="990" height="660" fetchpriority="high" />
         </div>
+
+        <div class="store-hero__bar">
+          <span class="store-hero__steps">Cleanse <span aria-hidden="true">/</span> Tone <span aria-hidden="true">/</span> Moisturize</span>
+          <a href="#collection" class="btn store-hero__shop" data-action="scroll-collection">
+            Shop the collection ${iconSvg('icon-chevron-down', 'icon--sm')}
+          </a>
+          <a href="#/routine" class="store-hero__routine">
+            See the daily routine ${iconSvg('icon-arrow-right', 'icon--sm')}
+          </a>
+        </div>
+
+        ${renderHeroFeature(foam, 'start')}
+        ${renderHeroFeature(duo, 'duo')}
       </div>
     </section>
 

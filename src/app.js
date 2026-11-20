@@ -50,6 +50,7 @@ const state = {
 
 let lastTrigger = null;
 let checkoutRequest = null;
+let disconnectCollectionObserver;
 
 function parseHash(rawHash) {
   const decode = (segment) => {
@@ -236,9 +237,10 @@ function renderRoute() {
     isMobileMenuOpen: state.isMobileMenuOpen,
   });
 
+  disconnectCollectionObserver?.();
   mainEl.innerHTML = renderActiveViewHtml();
   const explorer = mainEl.querySelector('[data-collection-explorer]');
-  if (explorer) bindCollectionControls(explorer);
+  disconnectCollectionObserver = explorer ? bindCollectionControls(explorer) : null;
 
   footerRoot.innerHTML = renderFooter();
 
@@ -286,6 +288,13 @@ function updateCatalogInPlace() {
   return products.length;
 }
 
+function syncCategoryTicker(explorer, animate = false) {
+  const track = explorer.querySelector('.cat-ticker__track');
+  const selected = track.querySelector('[aria-selected="true"]');
+  track.classList.toggle('is-sliding', animate);
+  track.style.setProperty('--ticker-offset', `${-(selected.offsetLeft + selected.offsetWidth / 2)}px`);
+}
+
 function selectCollection(id) {
   if (id === state.activeFilter) return;
   const explorer = document.querySelector('[data-collection-explorer]');
@@ -293,16 +302,18 @@ function selectCollection(id) {
   for (const photo of explorer.querySelectorAll('.cat-stage__bg')) {
     photo.classList.toggle('is-active', photo.dataset.cat === id);
   }
-  for (const tab of explorer.querySelectorAll('.collection-tab')) {
+  for (const tab of explorer.querySelectorAll('.cat-ticker__btn')) {
     const selected = tab.dataset.category === id;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   }
+  syncCategoryTicker(explorer, true);
+
   const count = updateCatalogInPlace();
   const panel = document.getElementById('catalog-grid-slot');
   panel.setAttribute('aria-labelledby', `collection-tab-${id}`);
   panel.firstElementChild.classList.add('is-filtered');
-  const title = explorer.querySelector('.collection-tab[aria-selected="true"]').textContent;
+  const title = explorer.querySelector('.cat-ticker__btn[aria-selected="true"] .cat-ticker__title').textContent;
   announce(`${title}. ${formatProductCount(count)} shown.`);
 }
 
@@ -312,10 +323,16 @@ function stepCollection(step) {
 
 function bindCollectionControls(explorer) {
   const stage = explorer.querySelector('.cat-stage');
-  const tabs = [...explorer.querySelectorAll('.collection-tab')];
+  syncCategoryTicker(explorer);
+  const resizeObserver = new ResizeObserver(() => syncCategoryTicker(explorer));
+  resizeObserver.observe(stage);
+  document.fonts.ready.then(() => {
+    if (explorer.isConnected) syncCategoryTicker(explorer);
+  });
 
   explorer.querySelector('[role="tablist"]').addEventListener('keydown', (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const tabs = [...explorer.querySelectorAll('.cat-ticker__btn')];
     switch (event.key) {
       case 'ArrowLeft': stepCollection(-1); break;
       case 'ArrowRight': stepCollection(1); break;
@@ -324,7 +341,7 @@ function bindCollectionControls(explorer) {
       default: return;
     }
     event.preventDefault();
-    explorer.querySelector('.collection-tab[aria-selected="true"]').focus({ preventScroll: true });
+    explorer.querySelector('.cat-ticker__btn[aria-selected="true"]').focus({ preventScroll: true });
   });
 
   let touchStart;
@@ -340,6 +357,7 @@ function bindCollectionControls(explorer) {
     if (Math.abs(x) >= 40 && Math.abs(x) > Math.abs(y) * 1.4) stepCollection(x < 0 ? 1 : -1);
   });
   stage.addEventListener('pointercancel', () => { touchStart = null; });
+  return () => resizeObserver.disconnect();
 }
 
 async function startCheckout(trigger) {
@@ -400,7 +418,7 @@ function scrollToCollection({ focusTab = false, behavior = 'instant' } = {}) {
   const section = document.getElementById('collection');
   if (!section) return;
   if (focusTab) {
-    section.querySelector('.collection-tab[aria-selected="true"]')?.focus({ preventScroll: true });
+    section.querySelector('.cat-ticker__btn[aria-selected="true"]')?.focus({ preventScroll: true });
   }
   section.scrollIntoView({ block: 'start', behavior });
 }
