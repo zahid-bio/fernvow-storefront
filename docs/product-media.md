@@ -19,7 +19,10 @@ The carousel scenes use built-in ImageGen with the original editorial panels and
 - **Toning.** Ripples in handblown glass casting light onto sage stone.
 - **Moisturizing.** A sweep of white cream on a rounded ceramic tile under a curved pool of light.
 - **The Daily Duo.** The cleanser and moisturizer on stepped stone with warm plaster and oatmeal linen.
+- **The Daily Trio.** Three current bottles centered on a straight sandstone shelf against golden-sage plaster, with window light and room for wide and mobile crops.
 - **Fragrance-free.** The toner and moisturizer on pale stone with olive plaster and folded cotton.
+
+The built-in ImageGen portrait prompt for `the-daily-trio-photo.webp` asks for the three full-size bottles from the routine lineup on peach travertine with warm window light, linen, and fern shadows inspired by The Daily Duo. The “The set” gallery view uses a detail crop of the new Trio panorama.
 
 ## Archive
 

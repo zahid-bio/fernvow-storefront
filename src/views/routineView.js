@@ -19,10 +19,13 @@ export function renderRoutineView() {
       <ol class="shop-grid shop-grid--related routine-page__steps">
         ${steps.map(([label, slug]) => `<li><h2>${label}</h2>${renderProductCard(getProductBySlug(slug))}</li>`).join('')}
       </ol>
-      <div class="routine-page__duo">
-        <h2 class="store-heading">Prefer two steps?</h2>
-        <p>The Daily Duo pairs our cleanser with a light, fragrance-free moisturizer.</p>
-        <a class="btn btn--fern" href="#/product/the-daily-duo">Shop The Daily Duo ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
+      <div class="routine-page__sets">
+        <h2 class="store-heading">Shop the full routine.</h2>
+        <p>The Daily Trio brings all three full-size formulas together.</p>
+        <div class="routine-page__set-links">
+          <a class="btn btn--fern" href="#/product/the-daily-trio">Shop The Daily Trio ${iconSvg('icon-arrow-right', 'icon--sm')}</a>
+          <a class="store-text-link" href="#/product/the-daily-duo">Shop the two-step Duo</a>
+        </div>
       </div>
     </div>
   `;

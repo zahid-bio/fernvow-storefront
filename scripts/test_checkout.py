@@ -67,6 +67,28 @@ class CheckoutTests(unittest.TestCase):
                     self.assertEqual(form["shipping_options[0][shipping_rate_data][fixed_amount][amount]"], shipping)
                     self.assertEqual(form["metadata[fernvow_shipping]"], shipping)
 
+    def test_trio_price_and_fulfillment_with_overlapping_items(self):
+        self.checkout.free_shipping_minimum = 6000
+        cart = {
+            "reference": self.reference,
+            "items": [
+                {"slug": "the-daily-trio", "quantity": 2},
+                {"slug": "the-daily-duo", "quantity": 1},
+                {"slug": "hydrating-toner", "quantity": 1},
+            ],
+            "subtotalCents": 27480,
+        }
+        with patch.object(self.checkout, "stripe", return_value={"url": self.checkout_url}) as stripe:
+            self.checkout.create(cart)
+        form = stripe.call_args.args[1]
+        self.assertEqual(form["line_items[2][price_data][product_data][name]"], "The Daily Trio")
+        self.assertEqual(form["line_items[2][price_data][unit_amount]"], 8995)
+        self.assertEqual(form["line_items[2][quantity]"], 2)
+        self.assertEqual(form["metadata[fernvow_shipping]"], 0)
+        expected = {"A5852": 3, "A5805": 3, "S0001": 3}
+        self.assertEqual(json.loads(form["metadata[fernvow_skus]"]), expected)
+        self.assertEqual(json.loads(form["payment_intent_data[metadata][fernvow_skus]"]), expected)
+
     def test_rejects_changed_prices_and_wrong_session_references(self):
         with patch.object(self.checkout, "stripe", return_value=self.session) as stripe:
             with self.assertRaisesRegex(CheckoutError, "pricing has changed"):

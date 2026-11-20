@@ -33,7 +33,7 @@ export function getProductScentLabel(product) {
   return {
     'contains-fragrance': 'Light floral scent',
     'fragrance-free': 'Fragrance-free',
-    'mixed-duo': 'Cleanser has a light floral scent',
+    'mixed-bundle': 'Cleanser has a light floral scent',
   }[product.fragranceStatus] || product.fragranceBadge;
 }
 
@@ -46,7 +46,7 @@ const DAILY_FACE_MOISTURIZER_INCI =
 const HYDRATING_TONER_INCI =
   'Aqua/Water, Rosa Damascena (Rose) Flower Water*, Glycerin**, Sodium PCA, Benzyl Alcohol, Chamomilla Recutita (Chamomile) Flower Extract*, Fragaria Ananassa (Strawberry) Fruit Extract*, Sodium Benzoate, Potassium Sorbate, Sodium Hyaluronate, Lactic Acid, Citric Acid';
 
-export const PRODUCTS = [
+const CORE_PRODUCTS = [
   {
     id: 'fernvow-daily-cleansing-foam',
     slug: 'daily-cleansing-foam',
@@ -135,7 +135,7 @@ export const PRODUCTS = [
     savingsAmount: 9.95,
     sizeDisplay: '150 mL + 50 mL',
     supplierSku: 'A5852 + S0001',
-    fragranceStatus: 'mixed-duo',
+    fragranceStatus: 'mixed-bundle',
     fragranceBadge: 'Foam: Lightly Scented · Cream: Fragrance-Free',
     fragranceNote:
       'Pairs the lightly scented Daily Cleansing Foam (contains Parfum/Fragrance) with the completely fragrance-free Daily Face Moisturizer (no added Parfum/Fragrance).',
@@ -335,6 +335,68 @@ export const PRODUCTS = [
       previewCaption: '200 mL / 6.76 fl oz disc-top bottle crafted for generous daily layering.',
     },
     bundleComponents: null,
+  },
+];
+
+const trioFormulas = ['daily-cleansing-foam', 'hydrating-toner', 'daily-face-moisturizer']
+  .map((slug) => CORE_PRODUCTS.find((product) => product.slug === slug));
+const trioPrice = 89.95;
+const trioSeparatePrice = trioFormulas.reduce((cents, product) => cents + Math.round(product.price * 100), 0);
+
+export const PRODUCTS = [
+  ...CORE_PRODUCTS,
+  {
+    id: 'fernvow-the-daily-trio',
+    slug: 'the-daily-trio',
+    handle: 'the-daily-trio',
+    name: 'The Daily Trio',
+    shortName: 'The Daily Trio',
+    benefit: 'Cleanse, tone, and moisturize in one set.',
+    subtitle: 'The full Fernvow routine with an airy cleansing foam, water-light toner, and soft daily moisturizer.',
+    isHero: false,
+    isBundle: true,
+    category: 'trio',
+    stepNumber: '01 + 02 + 03',
+    stepLabel: 'Steps 01–03 · Full Routine',
+    price: trioPrice,
+    compareAtPrice: trioSeparatePrice / 100,
+    savingsAmount: (trioSeparatePrice - Math.round(trioPrice * 100)) / 100,
+    sizeDisplay: '3 full-size products',
+    supplierSku: trioFormulas.map(({ supplierSku }) => supplierSku).join(' + '),
+    fragranceStatus: 'mixed-bundle',
+    fragranceBadge: 'Lightly scented cleanser · Fragrance-free toner and moisturizer',
+    fragranceNote: 'The cleansing foam has a light floral scent. The toner and moisturizer are fragrance-free.',
+    skinTypes: 'Especially for dry or dehydrated skin',
+    phRange: trioFormulas.map(({ shortName, phRange }) => `${shortName}: ${phRange}`).join(' · '),
+    texture: 'Airy foam, water-light toner, and silky cream',
+    finish: 'Fresh and softly hydrated',
+    shortDescription: 'Three full-size formulas for a morning or evening routine.',
+    directions: [
+      { step: 1, text: 'Cleanse with one to two pumps of foam on damp skin. Rinse with lukewarm water.' },
+      { step: 2, text: 'Press a few drops of toner onto clean skin, avoiding direct contact with eyes.' },
+      { step: 3, text: 'Finish by smoothing one pump of moisturizer over your face until absorbed.' },
+    ],
+    inci: trioFormulas.map(({ inci }) => inci).join('\n\n'),
+    packaging: {
+      bottle: 'Foam: HDPE #2 · Toner: PET #1 · Moisturizer: PP #5',
+      pumpOrCap: 'PP #5 foaming pump, disc-top cap, and airless pump',
+      recycling: 'Separate the cleanser pump and toner cap before recycling. The moisturizer bottle and pump are both PP #5. Follow local recycling guidance.',
+    },
+    images: {
+      primary: 'assets/photos/the-daily-trio-photo.webp',
+      editorialImage: 'assets/photos/editorial-routine-lineup.jpg',
+      editorialAlt: 'Fernvow moisturizer, cleanser, and toner on a coral stone shelf',
+      alt: 'The Daily Trio with Daily Cleansing Foam, Hydrating Toner, and Daily Face Moisturizer',
+    },
+    bundleComponents: trioFormulas.map(({ slug, name, sizeDisplay, supplierSku, price, fragranceBadge }) => ({
+      productSlug: slug,
+      name,
+      size: sizeDisplay,
+      supplierSku,
+      quantity: 1,
+      unitPrice: price,
+      fragranceBadge,
+    })),
   },
 ];
 

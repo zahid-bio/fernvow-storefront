@@ -7,6 +7,7 @@ const TICKER_ITEMS = [
   { id: 'all', title: 'all formulas', label: 'All', image: 'all' },
   { id: 'moisturize', title: 'moisturizing', label: 'Moisturize', image: 'moisturize' },
   { id: 'bundle', title: 'the duo', label: 'The Duo', image: 'duo' },
+  { id: 'trio', title: 'the trio', label: 'The Trio', image: 'trio' },
   { id: 'fragrance-free', title: 'fragrance-free', label: 'Fragrance-free', image: 'fragrance' },
 ];
 
@@ -73,7 +74,7 @@ function renderCollectionExplorer(activeFilter, sortBy, productCount) {
 const QUESTIONS = [
   ['Where should I start?', 'Start with the <a href="#/product/daily-cleansing-foam">Daily Cleansing Foam</a>. For a simple two-step routine, <a href="#/product/the-daily-duo">The Daily Duo</a> pairs it with moisturizer.'],
   ['Which products are fragrance-free?', 'The <a href="#/product/hydrating-toner">Hydrating Toner</a> and <a href="#/product/daily-face-moisturizer">Daily Face Moisturizer</a> are fragrance-free. The Daily Cleansing Foam has a light floral scent.'],
-  ['What order do I use them in?', 'Cleanse first, follow with <a href="#/product/hydrating-toner">Hydrating Toner</a>, and finish with moisturizer. <a href="#/product/the-daily-duo">The Daily Duo</a> pairs the first and last steps for a two-step routine.'],
+  ['What order do I use them in?', 'Cleanse first, follow with <a href="#/product/hydrating-toner">Hydrating Toner</a>, and finish with moisturizer. <a href="#/product/the-daily-trio">The Daily Trio</a> includes all three steps.'],
 ];
 
 export function filterAndSortProducts(activeFilter = 'all', sortBy = 'featured') {

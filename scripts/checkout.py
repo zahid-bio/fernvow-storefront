@@ -19,6 +19,7 @@ CATALOG = {
     "daily-face-moisturizer": ("Daily Face Moisturizer", 3995, ("S0001",)),
     "hydrating-toner": ("Hydrating Toner", 2995, ("A5805",)),
     "the-daily-duo": ("The Daily Duo", 6495, ("A5852", "S0001")),
+    "the-daily-trio": ("The Daily Trio", 8995, ("A5852", "A5805", "S0001")),
 }
 REFERENCE = re.compile(r"[a-f0-9]{32}\Z")
 SESSION_ID = re.compile(r"cs_live_[A-Za-z0-9_]{16,248}\Z")

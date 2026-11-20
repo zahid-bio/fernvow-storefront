@@ -7,6 +7,7 @@ const GALLERY_IMAGES = {
   tone: 'tone',
   moisturize: 'moisturize',
   bundle: 'duo',
+  trio: 'trio',
 };
 
 const RITUAL_HEADLINES = {
@@ -14,6 +15,7 @@ const RITUAL_HEADLINES = {
   tone: 'A little hydration in between.',
   moisturize: 'Finish with a light layer.',
   bundle: 'Two steps, morning or evening.',
+  trio: 'The full routine, morning or evening.',
 };
 
 export function getPdpMediaOptions(product) {
@@ -21,13 +23,14 @@ export function getPdpMediaOptions(product) {
     { id: 'studio', label: 'Product', src: product.images.primary, alt: product.images.alt },
     {
       id: 'detail',
-      label: product.isBundle ? 'The pair' : 'Texture',
+      label: { bundle: 'The pair', trio: 'The set' }[product.category] || 'Texture',
       src: `assets/photos/collection-${GALLERY_IMAGES[product.category]}.webp`,
       alt: {
         cleanse: 'Close-up of airy cleansing foam in a ceramic dish',
         tone: 'Clear water rippling in a blush glass dish',
         moisturize: 'An ivory moisturizer swatch on a coral tile',
         bundle: 'The pink cleanser and yellow moisturizer bottles on a sunlit stone ledge',
+        trio: 'All three Fernvow bottles on a sandstone shelf',
       }[product.category],
     },
     { id: 'routine', label: 'Routine', src: product.images.editorialImage, alt: product.images.editorialAlt },
@@ -97,7 +100,7 @@ function renderProductStory(product, qty, detailPhoto) {
           <p class="section-label">${escapeHtml(name)}</p>
           <h2 class="store-heading">${escapeHtml(product.benefit)}</h2>
           <p>${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}</p>
-          ${product.isBundle ? `<p class="product-deal">Save ${formatMoney(product.savingsAmount)} compared with buying both separately.</p>` : ''}
+          ${product.isBundle ? `<p class="product-deal">Save ${formatMoney(product.savingsAmount)} compared with buying the products separately.</p>` : ''}
           <div class="product-story__purchase">
             ${renderPurchaseButton(product, qty)}
             <span class="product-story__quantity" data-pdp-selected-qty${qty === 1 ? ' hidden' : ''}>${qty} selected</span>
@@ -121,7 +124,7 @@ export function renderProductView({ slug, qty = 1 }) {
   }
 
   const mediaOptions = getPdpMediaOptions(product);
-  const companions = PRODUCTS.filter((item) => item.slug !== product.slug);
+  const companions = PRODUCTS.filter((item) => item.slug !== product.slug).slice(0, 3);
 
   return `
     <div class="container product-page" data-formula="${escapeHtml(product.category)}">
