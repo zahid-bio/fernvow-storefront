@@ -2,7 +2,9 @@ import { formatMoney, getProductBySlug } from './data/catalog.js';
 import { getPageMetadata, getPageTags, SITE_ORIGIN } from './data/seo.js';
 import { createCommerceClient } from './services/commerce.js';
 import { beginCheckout, getCheckoutResult, getCheckoutSettings, rememberCheckout } from './services/checkout.js';
-import { bindTikTokPreferences, trackTikTok, trackTikTokView } from './services/tiktokPixel.js';
+import { bindCookiePreferences, consentAllows } from './services/cookieConsent.js';
+import { syncGoogleTags } from './services/googleTags.js';
+import { syncTikTokConsent, trackTikTok, trackTikTokView } from './services/tiktokPixel.js';
 import {
   renderHeader,
   renderMobileMenu,
@@ -671,8 +673,12 @@ commerce.subscribe((nextCart) => {
 });
 
 renderRoute();
-bindTikTokPreferences(() => trackTikTokView(state.route));
-trackTikTokView(state.route);
+bindCookiePreferences((previous) => {
+  const reload = syncGoogleTags();
+  syncTikTokConsent(previous.advertising);
+  if (reload) window.location.reload();
+  else if (!previous.advertising && consentAllows('advertising')) trackTikTokView(state.route);
+});
 const storeIntro = document.getElementById('store-intro');
 const opensAtCollection = window.location.hash === '#collection';
 if (state.route.name !== 'home' || opensAtCollection) {

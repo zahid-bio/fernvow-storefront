@@ -60,7 +60,7 @@ export function renderPoliciesView({ section = 'shipping', checkoutEnabled = fal
           </div>
 
           ${activeId === 'privacy' ? `
-            <button type="button" class="btn btn--outline" data-tiktok-preferences>Manage TikTok measurement</button>
+            <button type="button" class="btn btn--outline" data-cookie-preferences>Cookie preferences</button>
           ` : ''}
 
           ${activeId === 'contact' ? `

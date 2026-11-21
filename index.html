@@ -2,25 +2,6 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
   <script>document.documentElement.classList.add("store-js")</script>
-  <!-- Google Tag Manager -->
-  <script>
-    (() => {
-      // Checkout returns can carry order and Stripe session identifiers in the URL.
-      const { search, hash } = window.location;
-      const params = new URLSearchParams(search);
-      if (params.has('order') || params.has('session_id') || /^#\/checkout(?:\/|$)/.test(hash)) return;
-
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function gtag() { window.dataLayer.push(arguments); };
-      window.gtag('js', new Date());
-
-      const tag = document.createElement('script');
-      tag.async = true;
-      tag.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-5VF96GZH';
-      document.head.append(tag);
-    })();
-  </script>
-  <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#e9d8c4" />
@@ -62,11 +43,21 @@
   </div>
   <div id="store-intro" class="initial-loading" aria-hidden="true">fernvow</div>
   <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-  <aside id="tiktok-measurement" class="ad-measurement" aria-label="Advertising measurement choices" hidden>
-    <p>Allow TikTok to measure how people use Fernvow after seeing our ads. <a href="/policies/privacy">Privacy policy</a></p>
-    <div class="ad-measurement__actions">
-      <button type="button" class="btn btn--outline" data-tiktok-choice="decline">Decline</button>
-      <button type="button" class="btn btn--fern" data-tiktok-choice="allow">Allow measurement</button>
+  <aside id="cookie-preferences" class="cookie-preferences" aria-labelledby="cookie-preferences-title" hidden>
+    <h2 id="cookie-preferences-title" tabindex="-1">Cookie preferences</h2>
+    <p>Essential storage keeps your bag working. You can also allow analytics and advertising measurement. <a href="/policies/privacy">Privacy policy</a></p>
+    <details class="cookie-preferences__settings">
+      <summary>Choose settings</summary>
+      <fieldset>
+        <legend class="sr-only">Optional cookies</legend>
+        <label><input type="checkbox" name="analytics" /> <span><strong>Analytics</strong><small>Understand how visitors use the store.</small></span></label>
+        <label><input type="checkbox" name="advertising" /> <span><strong>Advertising</strong><small>Measure visits and orders from ads.</small></span></label>
+      </fieldset>
+      <button type="button" class="btn btn--outline" data-cookie-action="save">Save preferences</button>
+    </details>
+    <div class="cookie-preferences__actions">
+      <button type="button" class="btn btn--outline" data-cookie-action="essential">Essential only</button>
+      <button type="button" class="btn btn--fern" data-cookie-action="allow">Allow all</button>
     </div>
   </aside>
   <script type="module" src="/src/app.js"></script>

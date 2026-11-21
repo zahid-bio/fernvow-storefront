@@ -66,8 +66,8 @@ export const POLICIES = {
         body: 'Our payment providers process payments through their hosted checkout pages. Fernvow uses order and shipping details to fulfill your purchase and never sees your full card number.',
       },
       {
-        heading: 'TikTok Advertising Measurement',
-        body: 'If you allow TikTok measurement, TikTok may use cookies and device information to measure storefront visits, views of products, additions to your bag and the start of checkout. Fernvow may also include the ad campaign name with your Stripe order to count orders from that campaign. The TikTok Pixel does not run on Stripe payment or Fernvow receipt pages. You can change this choice at any time.',
+        heading: 'Analytics and Advertising Cookies',
+        body: 'With your permission, we use Google Analytics to understand how visitors use the store and TikTok to measure visits and shopping activity from ads. If you allow advertising measurement, Fernvow may include the campaign name with your Stripe order to count orders from that campaign. You can change your choices at any time through Cookie preferences in the footer.',
       },
       {
         heading: 'Privacy Requests',

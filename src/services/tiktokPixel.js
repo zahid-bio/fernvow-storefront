@@ -1,27 +1,15 @@
 import { getProductBySlug } from '../data/catalog.js';
+import { consentAllows } from './cookieConsent.js';
 
 const pixelId = 'DC0DQJBC77U7MFIGUD5G';
-const consentKey = 'fernvow-tiktok-measurement';
 const campaignKey = 'fernvow-tiktok-campaign';
 const duoLaunchCampaign = 'us_daily_duo_launch';
 const sdkUrl = 'https://analytics.tiktok.com/i18n/pixel/events.js';
-let preference;
 let initialized = false;
-let landedFromDuoAd = false;
-
-function isPublicStorefront() {
-  const { hostname, hash, search } = window.location;
-  const params = new URLSearchParams(search);
-  return hostname === 'fernvow.com' && !/^#\/checkout(?:\/|$)/.test(hash)
-    && !params.has('order') && !params.has('session_id') && !params.has('checkout');
-}
-
-function canMeasure() {
-  return isPublicStorefront() && navigator.globalPrivacyControl !== true && preference === 'allow';
-}
+let landedFromDuoAd;
 
 export function getTikTokCampaign() {
-  if (!canMeasure()) return null;
+  if (!consentAllows('advertising')) return null;
   if (landedFromDuoAd) return duoLaunchCampaign;
   try {
     return sessionStorage.getItem(campaignKey) === duoLaunchCampaign ? duoLaunchCampaign : null;
@@ -31,7 +19,7 @@ export function getTikTokCampaign() {
 }
 
 function loadPixel() {
-  if (!canMeasure()) return null;
+  if (!consentAllows('advertising')) return null;
   if (initialized) return window.ttq;
 
   // Bootstrap the queue used by TikTok's manual installation snippet.
@@ -67,49 +55,25 @@ function loadPixel() {
   return ttq;
 }
 
-export function bindTikTokPreferences(onAllow) {
-  const panel = document.getElementById('tiktok-measurement');
-  if (!panel || window.location.hostname !== 'fernvow.com') return;
-  const landing = new URLSearchParams(window.location.search);
-  landedFromDuoAd = landing.get('utm_source') === 'tiktok' && landing.get('utm_campaign') === duoLaunchCampaign;
-  try {
-    preference = localStorage.getItem(consentKey);
-  } catch {
-    // A visitor in a restricted browser can still make a choice for this page.
+export function syncTikTokConsent(previouslyAllowed) {
+  if (landedFromDuoAd === undefined) {
+    const landing = new URLSearchParams(window.location.search);
+    landedFromDuoAd = landing.get('utm_source') === 'tiktok' && landing.get('utm_campaign') === duoLaunchCampaign;
   }
-  if (navigator.globalPrivacyControl === true) panel.querySelector('[data-tiktok-choice="allow"]').disabled = true;
-  panel.hidden = Boolean(preference) || navigator.globalPrivacyControl === true || !isPublicStorefront();
-  document.addEventListener('click', (event) => {
-    const control = event.target instanceof Element && event.target.closest('[data-tiktok-choice], [data-tiktok-preferences]');
-    if (!control || !isPublicStorefront()) return;
-    if (control.hasAttribute('data-tiktok-preferences')) {
-      panel.hidden = false;
-      panel.querySelector('[data-tiktok-choice="decline"]').focus();
-      return;
+  const allowed = consentAllows('advertising');
+  try {
+    if (!allowed && previouslyAllowed) sessionStorage.removeItem(campaignKey);
+  } catch {
+    // Storage may be disabled by the browser.
+  }
+  try {
+    if (initialized && allowed !== previouslyAllowed) {
+      if (allowed) window.ttq?.grantConsent();
+      else window.ttq?.revokeConsent();
     }
-    const previous = preference;
-    preference = control.dataset.tiktokChoice === 'allow' && navigator.globalPrivacyControl !== true ? 'allow' : 'decline';
-    try {
-      localStorage.setItem(consentKey, preference);
-    } catch {
-      // Use the in-memory choice when browser storage is unavailable.
-    }
-    if (preference === 'decline') {
-      try { sessionStorage.removeItem(campaignKey); } catch { /* Storage may be unavailable. */ }
-    }
-    panel.hidden = true;
-    if (preference === previous) return;
-    try {
-      if (preference === 'allow') {
-        if (initialized) window.ttq?.grantConsent();
-        onAllow();
-      } else {
-        window.ttq?.revokeConsent();
-      }
-    } catch {
-      // The storefront remains usable if an extension blocks the SDK.
-    }
-  });
+  } catch {
+    // A blocked SDK never interrupts the storefront.
+  }
 }
 
 export function trackTikTok(event, items, value) {
@@ -133,7 +97,7 @@ export function trackTikTok(event, items, value) {
 export function trackTikTokView(route) {
   if (route.name === 'checkout') return;
   try {
-    if (landedFromDuoAd && canMeasure()) sessionStorage.setItem(campaignKey, duoLaunchCampaign);
+    if (landedFromDuoAd && consentAllows('advertising')) sessionStorage.setItem(campaignKey, duoLaunchCampaign);
   } catch {
     // The current-page campaign is still available without session storage.
   }

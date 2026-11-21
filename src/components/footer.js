@@ -21,6 +21,7 @@ export function renderFooter() {
         <div class="store-footer__legal">
           <span>&copy; ${new Date().getFullYear()} Fernvow</span>
           <a href="/policies/privacy">Privacy</a>
+          <button type="button" class="footer-cookie-preferences" data-cookie-preferences>Cookie preferences</button>
           <a href="/policies/terms">Terms</a>
         </div>
       </div>

@@ -21,3 +21,7 @@ Use Python 3 and Node.js 22 or newer. Open [the local storefront](http://127.0.0
 ## Checkout
 
 The default configuration runs in preview mode and saves the bag in the visitor’s browser. Stripe Checkout handles payments after the live account and server are configured. See the [payment setup guide](docs/payments-setup.md).
+
+## Cookie preferences
+
+Use `consentAllows('analytics')` or `consentAllows('advertising')` from `src/services/cookieConsent.js` before loading a new measurement tag or sending an event. Google Tag Manager currently hosts Google Analytics and loads after analytics consent. If adding a tag inside that container, also configure its consent checks in Tag Manager. Keep advertising-only integrations behind advertising consent and keep checkout receipt URLs outside measurement.
