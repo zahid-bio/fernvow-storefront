@@ -36,7 +36,7 @@ export const POLICIES = {
     sections: [
       {
         heading: 'Unopened Return Eligibility',
-        body: 'Unopened and unused items in their original packaging can be returned by mail within 30 days of delivery. Email care@fernvow.com with your order number to request a free prepaid return label you can print at home.',
+        body: 'Unopened and unused items in their original packaging can be returned by mail within 30 days of delivery. Email care@fernvow.com with your order number for return instructions. Customers arrange and pay for return shipping on regular returns.',
       },
       {
         heading: 'Skincare Hygiene Standard',
