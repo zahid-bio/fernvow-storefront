@@ -55,7 +55,7 @@ class CheckoutTests(unittest.TestCase):
             for slug, quantity, subtotal, shipping in (
                 ("hydrating-toner", 1, 2995, 895),
                 ("hydrating-toner", 2, 5990, 1095),
-                ("the-daily-duo", 1, 6495, 895),
+                ("the-daily-duo", 1, 6495, 1095),
                 ("the-daily-trio", 1, 8995, 1095),
             ):
                 with self.subTest(subtotal=subtotal):
@@ -70,7 +70,9 @@ class CheckoutTests(unittest.TestCase):
 
     def test_public_shipping_tiers_match_server_quotes(self):
         settings = public_shipping_settings()
-        self.assertEqual(settings["weightsGrams"]["the-daily-trio"], 750)
+        self.assertEqual(settings["weightsGrams"]["the-daily-trio"], 900)
+        mixed_cart_grams = settings["weightsGrams"]["hydrating-toner"] + settings["weightsGrams"]["daily-face-moisturizer"]
+        self.assertEqual(standard_shipping_cents(mixed_cart_grams), 1095)
         for tier in settings["tiers"]:
             self.assertEqual(standard_shipping_cents(tier["maxGrams"]), tier["cents"])
         self.assertEqual(standard_shipping_cents(501), 1095)

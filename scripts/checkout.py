@@ -21,8 +21,10 @@ CATALOG = {
     "the-daily-duo": ("The Daily Duo", 6495, ("A5852", "S0001")),
     "the-daily-trio": ("The Daily Trio", 8995, ("A5852", "A5805", "S0001")),
 }
-# Upper end of Selfnamed's published packaged-weight ranges for these sizes.
-SKU_WEIGHT_GRAMS = {"A5852": 300, "A5805": 300, "S0001": 150}
+# Selfnamed's upper packaged-weight estimates plus 50 g per bottle for
+# the shipping carton and inserts. Its toner + moisturizer quote uses the
+# band above 500 g even though the two packaged products alone estimate 450 g.
+SKU_WEIGHT_GRAMS = {"A5852": 350, "A5805": 350, "S0001": 200}
 # Maximum package weight and customer charge in cents. The U.S. supplier
 # rates are weight-based. Round up to cover processing on the shipping charge.
 US_STANDARD_SHIPPING = (
