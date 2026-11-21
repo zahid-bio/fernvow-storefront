@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { escapeHtml, renderHeader } from '../src/components/header.js';
 import { renderFooter } from '../src/components/footer.js';
-import { PRODUCTS } from '../src/data/catalog.js';
+import { CATALOG_META, PRODUCTS } from '../src/data/catalog.js';
 import { POLICIES } from '../src/data/policies.js';
 import { getPageMetadata, getPageTags, SITE_ORIGIN } from '../src/data/seo.js';
 import { renderBrandView } from '../src/views/brandView.js';
@@ -11,7 +11,7 @@ import { renderPoliciesView } from '../src/views/policiesView.js';
 import { renderProductView } from '../src/views/productView.js';
 import { renderRoutineView } from '../src/views/routineView.js';
 
-const [templatePath, output] = process.argv.slice(2);
+const [templatePath, output, shippingWeightsJson] = process.argv.slice(2);
 const template = readFileSync(templatePath, 'utf-8');
 const pages = [
   [{ name: 'home' }, renderHomeView({})],
@@ -57,5 +57,36 @@ writeFileSync(join(output, 'sitemap.xml'), [
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
   ...urls.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`),
   '</urlset>',
+  '',
+].join('\n'));
+
+const shippingWeights = JSON.parse(shippingWeightsJson);
+const merchantItems = PRODUCTS.map((product) => {
+  const fields = {
+    id: product.slug,
+    title: product.name,
+    description: product.subtitle,
+    link: `${SITE_ORIGIN}/product/${product.slug}`,
+    image_link: `${SITE_ORIGIN}/${product.images.primary}`,
+    availability: 'in_stock',
+    price: `${product.price.toFixed(2)} ${CATALOG_META.currency}`,
+    brand: CATALOG_META.brand,
+    condition: 'new',
+    is_bundle: product.isBundle ? 'yes' : 'no',
+    shipping_weight: `${shippingWeights[product.slug] / 1000} kg`,
+  };
+  const elements = Object.entries(fields).map(([name, value]) => `      <g:${name}>${escapeHtml(value)}</g:${name}>`);
+  return ['    <item>', ...elements, '    </item>'].join('\n');
+});
+writeFileSync(join(output, 'merchant-products-us.xml'), [
+  '<?xml version="1.0" encoding="UTF-8"?>',
+  '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">',
+  '  <channel>',
+  `    <title>${escapeHtml(CATALOG_META.brand)}</title>`,
+  `    <link>${SITE_ORIGIN}</link>`,
+  '    <description>Fernvow skincare products available in the United States.</description>',
+  ...merchantItems,
+  '  </channel>',
+  '</rss>',
   '',
 ].join('\n'));

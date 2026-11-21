@@ -1,8 +1,11 @@
 """Build the public Vercel output without shipping private/server files."""
 
+from json import dumps
 from pathlib import Path
 from shutil import copy2, copytree
 from subprocess import run
+
+from checkout import public_shipping_settings
 
 root = Path(__file__).resolve().parent.parent
 output = root / "dist"
@@ -19,4 +22,5 @@ for verification_file in root.glob("google*.html"):
 run([
     "node", str(root / "scripts" / "render_storefront.mjs"),
     str(root / "index.html"), str(output),
+    dumps(public_shipping_settings()["weightsGrams"]),
 ], check=True)
