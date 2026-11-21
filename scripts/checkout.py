@@ -153,7 +153,7 @@ class Checkout:
             headers["Idempotency-Key"] = reference
         return request_json(STRIPE_URL + path, headers=headers, form=form)
 
-    def create_stripe_session(self, reference, quantities, subtotal):
+    def create_stripe_session(self, reference, quantities, subtotal, campaign=None):
         fulfillment = {}
         for slug, quantity in quantities.items():
             for sku in CATALOG[slug][2]:
@@ -182,6 +182,9 @@ class Checkout:
             "shipping_options[0][shipping_rate_data][fixed_amount][amount]": shipping,
             "shipping_options[0][shipping_rate_data][fixed_amount][currency]": "usd",
         }
+        if campaign == "us_daily_duo_launch":
+            form["metadata[fernvow_campaign]"] = campaign
+            form["payment_intent_data[metadata][fernvow_campaign]"] = campaign
         for index, (slug, quantity) in enumerate(quantities.items()):
             name, price, _ = CATALOG[slug]
             prefix = f"line_items[{index}]"
@@ -202,7 +205,7 @@ class Checkout:
             raise CheckoutError(400, "Invalid checkout reference.")
 
         quantities, subtotal = resolve_cart(body)
-        session = self.create_stripe_session(reference, quantities, subtotal)
+        session = self.create_stripe_session(reference, quantities, subtotal, body.get("campaign"))
         url = session.get("url")
         redirect = urllib.parse.urlsplit(url) if url else None
         if not redirect or redirect.scheme != "https" or redirect.netloc != "checkout.stripe.com":

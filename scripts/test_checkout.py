@@ -50,6 +50,15 @@ class CheckoutTests(unittest.TestCase):
         self.assertNotIn("payment_method_types[0]", form)
         self.assertEqual(json.loads(form["payment_intent_data[metadata][fernvow_skus]"]), {"A5852": 3, "S0001": 2})
 
+    def test_checkout_records_only_the_known_campaign_in_stripe(self):
+        with patch.object(self.checkout, "stripe", return_value={"url": self.checkout_url}) as stripe:
+            self.checkout.create({**self.cart, "campaign": "us_daily_duo_launch"})
+            form = stripe.call_args.args[1]
+            self.assertEqual(form["metadata[fernvow_campaign]"], "us_daily_duo_launch")
+            self.assertEqual(form["payment_intent_data[metadata][fernvow_campaign]"], "us_daily_duo_launch")
+            self.checkout.create({**self.cart, "campaign": "unsupported"})
+            self.assertNotIn("metadata[fernvow_campaign]", stripe.call_args.args[1])
+
     def test_checkout_charges_by_packed_weight(self):
         with patch.object(self.checkout, "stripe", return_value={"url": self.checkout_url}) as stripe:
             for slug, quantity, subtotal, shipping in (

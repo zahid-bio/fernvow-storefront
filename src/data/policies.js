@@ -67,7 +67,7 @@ export const POLICIES = {
       },
       {
         heading: 'TikTok Advertising Measurement',
-        body: 'If you allow TikTok measurement, TikTok may use cookies and device information to measure storefront visits, views of products, additions to your bag and the start of checkout. The TikTok Pixel does not run on Stripe payment or Fernvow receipt pages. You can change this choice at any time.',
+        body: 'If you allow TikTok measurement, TikTok may use cookies and device information to measure storefront visits, views of products, additions to your bag and the start of checkout. Fernvow may also include the ad campaign name with your Stripe order to count orders from that campaign. The TikTok Pixel does not run on Stripe payment or Fernvow receipt pages. You can change this choice at any time.',
       },
       {
         heading: 'Privacy Requests',

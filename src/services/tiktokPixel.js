@@ -2,9 +2,12 @@ import { getProductBySlug } from '../data/catalog.js';
 
 const pixelId = 'DC0DQJBC77U7MFIGUD5G';
 const consentKey = 'fernvow-tiktok-measurement';
+const campaignKey = 'fernvow-tiktok-campaign';
+const duoLaunchCampaign = 'us_daily_duo_launch';
 const sdkUrl = 'https://analytics.tiktok.com/i18n/pixel/events.js';
 let preference;
 let initialized = false;
+let landedFromDuoAd = false;
 
 function isPublicStorefront() {
   const { hostname, hash, search } = window.location;
@@ -13,8 +16,22 @@ function isPublicStorefront() {
     && !params.has('order') && !params.has('session_id') && !params.has('checkout');
 }
 
+function canMeasure() {
+  return isPublicStorefront() && navigator.globalPrivacyControl !== true && preference === 'allow';
+}
+
+export function getTikTokCampaign() {
+  if (!canMeasure()) return null;
+  if (landedFromDuoAd) return duoLaunchCampaign;
+  try {
+    return sessionStorage.getItem(campaignKey) === duoLaunchCampaign ? duoLaunchCampaign : null;
+  } catch {
+    return null;
+  }
+}
+
 function loadPixel() {
-  if (!isPublicStorefront() || navigator.globalPrivacyControl === true || preference !== 'allow') return null;
+  if (!canMeasure()) return null;
   if (initialized) return window.ttq;
 
   // Bootstrap the queue used by TikTok's manual installation snippet.
@@ -53,6 +70,8 @@ function loadPixel() {
 export function bindTikTokPreferences(onAllow) {
   const panel = document.getElementById('tiktok-measurement');
   if (!panel || window.location.hostname !== 'fernvow.com') return;
+  const landing = new URLSearchParams(window.location.search);
+  landedFromDuoAd = landing.get('utm_source') === 'tiktok' && landing.get('utm_campaign') === duoLaunchCampaign;
   try {
     preference = localStorage.getItem(consentKey);
   } catch {
@@ -74,6 +93,9 @@ export function bindTikTokPreferences(onAllow) {
       localStorage.setItem(consentKey, preference);
     } catch {
       // Use the in-memory choice when browser storage is unavailable.
+    }
+    if (preference === 'decline') {
+      try { sessionStorage.removeItem(campaignKey); } catch { /* Storage may be unavailable. */ }
     }
     panel.hidden = true;
     if (preference === previous) return;
@@ -110,6 +132,11 @@ export function trackTikTok(event, items, value) {
 
 export function trackTikTokView(route) {
   if (route.name === 'checkout') return;
+  try {
+    if (landedFromDuoAd && canMeasure()) sessionStorage.setItem(campaignKey, duoLaunchCampaign);
+  } catch {
+    // The current-page campaign is still available without session storage.
+  }
   try {
     loadPixel()?.page();
     const product = route.name === 'product' && getProductBySlug(route.slug);

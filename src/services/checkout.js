@@ -1,3 +1,5 @@
+import { getTikTokCampaign } from './tiktokPixel.js';
+
 const pendingCartKey = 'fernvow_checkout_cart';
 let checkoutAttempt;
 
@@ -35,13 +37,15 @@ function checkoutItems(cart) {
 export async function beginCheckout(cart) {
   const items = checkoutItems(cart);
   const subtotalCents = Math.round(cart.subtotal * 100);
-  const fingerprint = JSON.stringify({ items, subtotalCents });
+  const campaign = getTikTokCampaign();
+  const order = { items, subtotalCents, ...(campaign && { campaign }) };
+  const fingerprint = JSON.stringify(order);
   if (checkoutAttempt?.fingerprint !== fingerprint) {
     checkoutAttempt = { fingerprint, reference: crypto.randomUUID().replaceAll('-', '') };
   }
   const attempt = checkoutAttempt;
   try {
-    return await checkoutRequest('/api/checkout', { items, subtotalCents, reference: attempt.reference });
+    return await checkoutRequest('/api/checkout', { ...order, reference: attempt.reference });
   } catch (error) {
     if (error.status === 409 && checkoutAttempt === attempt) checkoutAttempt = null;
     throw error;
