@@ -67,7 +67,11 @@ export const POLICIES = {
       },
       {
         heading: 'Analytics and Advertising Cookies',
-        body: 'With your permission, we use Google Analytics to understand how visitors use the store and TikTok to measure visits and shopping activity from ads. If you allow advertising measurement, Fernvow may include the campaign name with your Stripe order to count orders from that campaign. You can change your choices at any time through Cookie preferences in the footer.',
+        body: 'We use Google Analytics to understand how visitors use the store and the TikTok Pixel to measure visits, product views, additions to your bag and checkout starts from ads. These services may use cookies and information about your browser, device and activity. When advertising measurement is on, Fernvow may include an ad campaign name with your Stripe order to count orders from that campaign.',
+      },
+      {
+        heading: 'Your Cookie Choices',
+        body: 'Analytics and advertising measurement are on by default for visitors we identify as being in the United States. Elsewhere, optional measurement starts after you choose to allow it. Use Cookie preferences in the footer to turn either category off or choose Essential only. A Global Privacy Control signal turns off advertising measurement. We respect the cookie choices you have already saved.',
       },
       {
         heading: 'Privacy Requests',
@@ -87,6 +91,10 @@ export const POLICIES = {
       {
         heading: 'Brand & Storefront',
         body: 'This website is operated by Fernvow for direct-to-consumer personal care orders in USD across eligible US shipping destinations.',
+      },
+      {
+        heading: 'Cookies and Measurement',
+        body: 'Essential storage supports your shopping bag and cookie choices. Analytics and advertising measurement are governed by our Privacy Policy and the choices available through Cookie preferences in the footer.',
       },
       {
         heading: 'Cosmetic Use Notice',

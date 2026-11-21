@@ -60,8 +60,11 @@ export function renderPoliciesView({ section = 'shipping', checkoutEnabled = fal
           </div>
 
           ${activeId === 'privacy' ? `
+            <p class="policy-privacy-links"><a href="https://policies.google.com/technologies/partner-sites">How Google uses data</a> · <a href="https://www.tiktok.com/legal/page/us/privacy-policy/en">TikTok Privacy Policy</a></p>
             <button type="button" class="btn btn--outline" data-cookie-preferences>Cookie preferences</button>
           ` : ''}
+
+          ${activeId === 'terms' ? `<p><a href="/policies/privacy">Privacy Policy and cookie choices</a></p>` : ''}
 
           ${activeId === 'contact' ? `
             <div><a class="btn btn--fern" href="mailto:care@fernvow.com">Email customer care</a></div>

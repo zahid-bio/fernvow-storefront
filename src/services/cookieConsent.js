@@ -1,6 +1,10 @@
 const preferencesKey = 'fernvow-cookie-preferences';
+const noticeKey = 'fernvow-cookie-notice-seen';
 const essentialOnly = { analytics: false, advertising: false };
+const automaticChoices = { analytics: true, advertising: true };
 let preferences = null;
+let automatic = false;
+let privacySignal = false;
 
 export function isMeasurementPage() {
   const { hostname, pathname, hash, search } = window.location;
@@ -11,9 +15,10 @@ export function isMeasurementPage() {
 }
 
 function allowedChoices() {
+  const choices = preferences ?? (automatic ? automaticChoices : essentialOnly);
   return {
-    analytics: preferences?.analytics === true,
-    advertising: preferences?.advertising === true && navigator.globalPrivacyControl !== true,
+    analytics: choices.analytics,
+    advertising: choices.advertising && !privacySignal && navigator.globalPrivacyControl !== true,
   };
 }
 
@@ -35,6 +40,16 @@ function storedPreferences() {
   return null;
 }
 
+async function regionalPrivacySettings() {
+  try {
+    const response = await fetch('/api/privacy', { cache: 'no-store', signal: AbortSignal.timeout(2500) });
+    if (response.ok) return await response.json();
+  } catch {
+    // Keep optional tags off until a visitor chooses when their region is unknown.
+  }
+  return {};
+}
+
 export function bindCookiePreferences(onChange) {
   const panel = document.getElementById('cookie-preferences');
   const settings = panel.querySelector('details');
@@ -42,18 +57,39 @@ export function bindCookiePreferences(onChange) {
   const analytics = panel.querySelector('[name="analytics"]');
   const advertising = panel.querySelector('[name="advertising"]');
   const allowAll = panel.querySelector('[data-cookie-action="allow"]');
-  const globalPrivacyControl = navigator.globalPrivacyControl === true;
+  const dismiss = panel.querySelector('[data-cookie-action="dismiss"]');
+  const notice = panel.querySelector('[data-cookie-notice]');
   let trigger;
+  let noticeSeen = false;
+  let initialized = false;
 
-  advertising.disabled = globalPrivacyControl;
-  if (globalPrivacyControl) allowAll.textContent = 'Allow analytics';
   preferences = storedPreferences();
-  panel.hidden = Boolean(preferences) || !isMeasurementPage();
-  onChange(essentialOnly);
+  try {
+    noticeSeen = sessionStorage.getItem(noticeKey) === '1';
+  } catch {
+    // The notice can still be dismissed for this page.
+  }
+
+  const initialize = (settings) => {
+    automatic = settings.automaticMeasurement === true;
+    privacySignal = settings.globalPrivacyControl === true || navigator.globalPrivacyControl === true;
+    advertising.disabled = privacySignal;
+    if (privacySignal) allowAll.textContent = 'Allow analytics';
+    if (automatic) {
+      notice.textContent = 'We use cookies for analytics and advertising measurement. You can choose your settings or keep essential storage only.';
+      allowAll.hidden = true;
+      dismiss.hidden = false;
+    }
+    panel.hidden = Boolean(preferences) || (automatic && noticeSeen) || !isMeasurementPage();
+    initialized = true;
+    onChange(essentialOnly);
+  };
+  if (isMeasurementPage()) regionalPrivacySettings().then(initialize);
+  else initialize({});
 
   document.addEventListener('click', (event) => {
     const control = event.target instanceof Element && event.target.closest('[data-cookie-preferences], [data-cookie-action]');
-    if (!control || window.location.hostname !== 'fernvow.com') return;
+    if (!control || !initialized || window.location.hostname !== 'fernvow.com') return;
 
     const previous = allowedChoices();
     if (control.hasAttribute('data-cookie-preferences')) {
@@ -67,20 +103,21 @@ export function bindCookiePreferences(onChange) {
     }
 
     const action = control.dataset.cookieAction;
-    preferences = {
-      analytics: action === 'allow' || (action === 'save' && analytics.checked),
-      advertising: !globalPrivacyControl && (action === 'allow' || (action === 'save' && advertising.checked)),
-    };
-    try {
-      localStorage.setItem(preferencesKey, JSON.stringify(preferences));
-    } catch {
-      // Use the in-memory preferences when browser storage is unavailable.
+    if (action === 'dismiss') {
+      noticeSeen = true;
+      try { sessionStorage.setItem(noticeKey, '1'); } catch { /* Storage may be unavailable. */ }
+    } else {
+      preferences = {
+        analytics: action === 'allow' || (action === 'save' && analytics.checked),
+        advertising: !privacySignal && (action === 'allow' || (action === 'save' && advertising.checked)),
+      };
+      try { localStorage.setItem(preferencesKey, JSON.stringify(preferences)); } catch { /* Storage may be unavailable. */ }
     }
     panel.hidden = true;
     settings.open = false;
     if (trigger?.isConnected) trigger.focus();
     trigger = null;
-    onChange(previous);
+    if (action !== 'dismiss') onChange(previous);
   });
 
   panel.addEventListener('keydown', (event) => {
@@ -92,10 +129,10 @@ export function bindCookiePreferences(onChange) {
   });
 
   window.addEventListener('storage', (event) => {
-    if (event.key !== preferencesKey && event.key !== null) return;
+    if (!initialized || (event.key !== preferencesKey && event.key !== null)) return;
     const previous = allowedChoices();
     preferences = storedPreferences();
-    panel.hidden = Boolean(preferences) || !isMeasurementPage();
+    panel.hidden = Boolean(preferences) || (automatic && noticeSeen) || !isMeasurementPage();
     onChange(previous);
   });
 }

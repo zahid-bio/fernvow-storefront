@@ -43,6 +43,15 @@ def json_response(start_response, status, payload):
     return [encoded]
 
 
+def privacy_api(environ, start_response):
+    if environ["REQUEST_METHOD"] != "GET":
+        return json_response(start_response, 405, {"message": "Method not allowed."})
+    return json_response(start_response, 200, {
+        "automaticMeasurement": environ.get("HTTP_X_VERCEL_IP_COUNTRY") == "US",
+        "globalPrivacyControl": environ.get("HTTP_SEC_GPC") == "1",
+    })
+
+
 def serve_file(environ, start_response):
     request_path = environ["PATH_INFO"].strip("/")
     if not request_path or PUBLIC_PAGE.fullmatch(request_path):
@@ -121,6 +130,8 @@ def create_app(local_origin="http://127.0.0.1:4173"):
     checkout = Checkout.from_environment(origin)
 
     def app(environ, start_response):
+        if environ["PATH_INFO"] == "/api/privacy":
+            return privacy_api(environ, start_response)
         if environ["PATH_INFO"].startswith("/api/"):
             return checkout_api(checkout, environ, start_response)
         if environ["REQUEST_METHOD"] in {"GET", "HEAD"}:

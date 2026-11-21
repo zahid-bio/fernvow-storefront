@@ -24,4 +24,4 @@ The default configuration runs in preview mode and saves the bag in the visitorâ
 
 ## Cookie preferences
 
-Use `consentAllows('analytics')` or `consentAllows('advertising')` from `src/services/cookieConsent.js` before loading a new measurement tag or sending an event. Google Tag Manager currently hosts Google Analytics and loads after analytics consent. If adding a tag inside that container, also configure its consent checks in Tag Manager. Keep advertising-only integrations behind advertising consent and keep checkout receipt URLs outside measurement.
+Use `consentAllows('analytics')` or `consentAllows('advertising')` from `src/services/cookieConsent.js` before loading a measurement tag or sending an event. Saved choices override regional defaults. `/api/privacy` uses Vercel's country header for the U.S. default and checks the browser's Global Privacy Control header. Optional tags require opt-in when the country is outside the U.S. or unknown. If adding a tag inside Google Tag Manager, configure its consent checks there as well. Keep checkout receipt URLs outside measurement.

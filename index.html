@@ -45,7 +45,7 @@
   <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   <aside id="cookie-preferences" class="cookie-preferences" aria-labelledby="cookie-preferences-title" hidden>
     <h2 id="cookie-preferences-title" tabindex="-1">Cookie preferences</h2>
-    <p>Essential storage keeps your bag working. You can also allow analytics and advertising measurement. <a href="/policies/privacy">Privacy policy</a></p>
+    <p><span data-cookie-notice>Essential storage keeps your bag working. You can also allow analytics and advertising measurement.</span> <a href="/policies/privacy">Privacy policy</a></p>
     <details class="cookie-preferences__settings">
       <summary>Choose settings</summary>
       <fieldset>
@@ -58,6 +58,7 @@
     <div class="cookie-preferences__actions">
       <button type="button" class="btn btn--outline" data-cookie-action="essential">Essential only</button>
       <button type="button" class="btn btn--fern" data-cookie-action="allow">Allow all</button>
+      <button type="button" class="btn btn--fern" data-cookie-action="dismiss" hidden>Continue</button>
     </div>
   </aside>
   <script type="module" src="/src/app.js"></script>
