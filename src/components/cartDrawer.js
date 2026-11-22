@@ -1,12 +1,12 @@
 import { formatMoney } from '../data/catalog.js';
+import { getShippingCents } from '../services/commerce.js';
 import { escapeHtml, iconSvg } from './header.js';
 
-export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, checkoutEnabled, shipping }) {
+export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage, checkoutEnabled, shipping, offerMessage }) {
   if (!isOpen) return '';
 
   const items = cart?.items || [];
-  const weight = shipping && items.reduce((grams, item) => grams + shipping.weightsGrams[item.slug] * item.quantity, 0);
-  const shippingCents = shipping?.tiers.find((tier) => weight <= tier.maxGrams)?.cents;
+  const shippingCents = getShippingCents(shipping, items);
   const hasShippingQuote = checkoutEnabled && Number.isInteger(shippingCents);
 
   return `
@@ -52,6 +52,16 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
               </article>
             `).join('')}
           </div>
+          <details class="cart-offer"${offerMessage ? ' open' : ''}>
+            <summary>Use a promo code</summary>
+            <form id="cart-offer">
+              <label class="sr-only" for="cart-offer-code">Promo code</label>
+              <input id="cart-offer-code" name="code" placeholder="Enter code" maxlength="24"
+                autocomplete="off" autocapitalize="characters" spellcheck="false" required />
+              <button class="btn btn--outline" type="submit">Apply</button>
+            </form>
+            ${offerMessage ? `<p id="cart-offer-result" role="status" tabindex="-1">${escapeHtml(offerMessage)}</p>` : ''}
+          </details>
         `}
       </div>
 
@@ -60,6 +70,7 @@ export function renderCartDrawer({ isOpen, cart, isCheckingOut, checkoutMessage,
           <div class="cart-summary-row cart-summary-row--total">
             <span>Subtotal</span><strong>${formatMoney(cart.subtotal)}</strong>
           </div>
+          ${cart.bundleSavings ? `<p class="cart-drawer__note">Bundle savings included · ${formatMoney(cart.bundleSavings)}</p>` : ''}
           ${hasShippingQuote ? `
             <div class="cart-summary-row">
               <span>Standard US shipping</span><strong>${formatMoney(shippingCents / 100)}</strong>

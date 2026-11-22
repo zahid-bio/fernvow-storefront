@@ -1,6 +1,7 @@
 import { PRODUCTS, formatMoney, getProductBySlug, getProductScentLabel } from '../data/catalog.js';
 import { escapeHtml, iconSvg } from '../components/header.js';
 import { renderProductCard } from './homeView.js';
+import { DAILY_DUO_OFFER } from '../services/commerce.js';
 
 const GALLERY_IMAGES = {
   cleanse: 'cleanse',
@@ -20,7 +21,10 @@ const RITUAL_HEADLINES = {
 
 export function getPdpMediaOptions(product) {
   return [
-    { id: 'studio', label: 'Product', src: product.images.primary, alt: product.images.alt },
+    {
+      id: 'studio', label: 'Product', src: product.images.primary, alt: product.images.alt,
+      mobileSrc: product.slug === 'the-daily-duo' ? product.images.editorialImage : null,
+    },
     {
       id: 'detail',
       label: { bundle: 'The pair', trio: 'The set' }[product.category] || 'Texture',
@@ -38,7 +42,8 @@ export function getPdpMediaOptions(product) {
 }
 
 export function renderPdpMedia(media) {
-  return `<img src="/${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media="${media.id}" fetchpriority="high" />`;
+  const img = `<img src="/${escapeHtml(media.src)}" alt="${escapeHtml(media.alt)}" class="pdp-stage__img" data-media="${media.id}" fetchpriority="high" />`;
+  return media.mobileSrc ? `<picture class="pdp-stage__picture"><source media="(max-width: 640px)" srcset="/${escapeHtml(media.mobileSrc)}" />${img}</picture>` : img;
 }
 
 function renderIngredients(product) {
@@ -112,7 +117,7 @@ function renderProductStory(product, qty, detailPhoto) {
   `;
 }
 
-export function renderProductView({ slug, qty = 1 }) {
+export function renderProductView({ slug, qty = 1, offerCode }) {
   const product = getProductBySlug(slug);
   if (!product) {
     return `
@@ -125,6 +130,7 @@ export function renderProductView({ slug, qty = 1 }) {
 
   const mediaOptions = getPdpMediaOptions(product);
   const companions = PRODUCTS.filter((item) => item.slug !== product.slug).slice(0, 3);
+  const isDuo = product.slug === 'the-daily-duo';
 
   return `
     <div class="container product-page" data-formula="${escapeHtml(product.category)}">
@@ -140,7 +146,7 @@ export function renderProductView({ slug, qty = 1 }) {
             ${mediaOptions.map(({ id, label, src }) => `
               <button type="button" class="product-gallery__button" data-action="set-pdp-media"
                 data-media="${id}" data-slug="${slug}" aria-pressed="${String(id === 'studio')}" aria-controls="pdp-stage">
-                <img src="/${escapeHtml(src)}" alt="" width="40" height="40" />
+                <img src="/${escapeHtml(src)}" alt="" width="40" height="40" loading="lazy" decoding="async" />
                 <span>${label}</span>
               </button>
             `).join('')}
@@ -149,12 +155,12 @@ export function renderProductView({ slug, qty = 1 }) {
 
         <section class="product-page__info" aria-labelledby="product-title">
           <h1 id="product-title">${escapeHtml(product.name)}</h1>
-          <p class="product-page__summary">${escapeHtml(product.subtitle)}</p>
+          <p class="product-page__summary">${escapeHtml(isDuo ? 'Two full-size essentials. An airy cleansing foam and a light, fragrance-free face moisturizer.' : product.subtitle)}</p>
           <p class="product-page__facts">${escapeHtml(product.sizeDisplay)} <span aria-hidden="true">·</span> ${escapeHtml(getProductScentLabel(product))}</p>
           <div class="pdp-price-bar">
             <strong class="pdp-price">${formatMoney(product.price)}</strong>
-            ${product.compareAtPrice ? `<del>${formatMoney(product.compareAtPrice)}</del>` : ''}
-            ${product.savingsAmount ? `<span class="product-savings">Save ${formatMoney(product.savingsAmount)}</span>` : ''}
+            ${product.compareAtPrice ? `<span class="pdp-separate-price">${formatMoney(product.compareAtPrice)} separately</span>` : ''}
+            ${product.savingsAmount ? `<span class="product-savings">Save ${formatMoney(product.savingsAmount)}${isDuo && offerCode === DAILY_DUO_OFFER ? ` · ${DAILY_DUO_OFFER}` : ''}</span>` : ''}
           </div>
           <div class="pdp-purchase-row">
             <div class="qty-stepper" role="group" aria-label="Quantity">
@@ -167,6 +173,10 @@ export function renderProductView({ slug, qty = 1 }) {
             </div>
             ${renderPurchaseButton(product, qty, true)}
           </div>
+          ${isDuo ? `
+            <button type="button" class="btn btn--outline btn--full pdp-buy-now" data-action="buy-duo" hidden>Buy now</button>
+            <p class="pdp-shipping-note" data-pdp-shipping aria-live="polite">Shipping and tax shown at checkout.</p>
+          ` : ''}
 
           <nav class="product-order-links" aria-label="Order information">
             <a href="/policies/shipping">Shipping and delivery</a>

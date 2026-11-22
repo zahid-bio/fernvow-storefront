@@ -4,6 +4,12 @@ import { STOREFRONT_CONFIG } from '../../config/storefront.config.js';
 import { getProductBySlug } from '../data/catalog.js';
 
 const DEFAULT_STORAGE_KEY = 'fernvow_preview_cart_v1';
+export const DAILY_DUO_OFFER = 'DUO995';
+
+export function getShippingCents(shipping, items) {
+  const weight = shipping && items.reduce((grams, { slug, quantity }) => grams + shipping.weightsGrams[slug] * quantity, 0);
+  return shipping?.tiers.find(({ maxGrams }) => weight <= maxGrams)?.cents;
+}
 
 function roundMoney(value) {
   return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -200,6 +206,27 @@ export function createCommerceClient(config = STOREFRONT_CONFIG) {
 
   const clearCart = () => commit([]);
 
+  const applyDuoOffer = (code) => {
+    if (code.trim().toUpperCase() !== DAILY_DUO_OFFER) return 'invalid';
+
+    const duo = getProductBySlug('the-daily-duo');
+    const quantities = new Map(entries.map(({ slug, quantity }) => [slug, quantity]));
+    const existingDuos = quantities.get(duo.slug) || 0;
+    const pairs = Math.min(20 - existingDuos, ...duo.bundleComponents.map(({ productSlug, quantity }) =>
+      Math.floor((quantities.get(productSlug) || 0) / quantity)
+    ));
+    if (pairs <= 0) return existingDuos ? 'included' : 'missing';
+
+    for (const { productSlug, quantity } of duo.bundleComponents) {
+      quantities.set(productSlug, quantities.get(productSlug) - quantity * pairs);
+    }
+    quantities.set(duo.slug, existingDuos + pairs);
+    commit([...quantities]
+      .filter(([, quantity]) => quantity > 0)
+      .map(([slug, quantity]) => ({ slug, quantity })));
+    return 'applied';
+  };
+
   const subscribe = (listener) => {
     if (typeof listener !== 'function') return () => {};
     listeners.add(listener);
@@ -214,6 +241,7 @@ export function createCommerceClient(config = STOREFRONT_CONFIG) {
     updateQuantity,
     removeItem,
     clearCart,
+    applyDuoOffer,
     subscribe,
   };
 }

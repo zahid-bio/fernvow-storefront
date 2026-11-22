@@ -1,6 +1,6 @@
 import { formatMoney, getProductBySlug } from './data/catalog.js';
 import { getPageMetadata, getPageTags, SITE_ORIGIN } from './data/seo.js';
-import { createCommerceClient } from './services/commerce.js';
+import { createCommerceClient, getShippingCents } from './services/commerce.js';
 import { beginCheckout, getCheckoutResult, getCheckoutSettings, rememberCheckout } from './services/checkout.js';
 import { bindCookiePreferences, consentAllows } from './services/cookieConsent.js';
 import { syncGoogleTags } from './services/googleTags.js';
@@ -47,6 +47,7 @@ const state = {
   isSearchOpen: false,
   searchQuery: '',
   checkoutMessage: '',
+  offerMessage: '',
   checkoutEnabled: false,
   shipping: null,
   checkoutResult: { status: 'loading' },
@@ -147,6 +148,21 @@ function updateQuickCheckout() {
   button.hidden = !state.checkoutEnabled || !state.cart.itemCount || state.route.name === 'checkout';
   button.setAttribute('aria-disabled', String(Boolean(checkoutRequest)));
   button.textContent = checkoutRequest ? 'Opening checkout…' : `Checkout · ${formatMoney(state.cart.subtotal)}`;
+  const buyDuo = document.querySelector('[data-action="buy-duo"]');
+  if (buyDuo) {
+    buyDuo.hidden = !state.checkoutEnabled;
+    buyDuo.setAttribute('aria-disabled', String(Boolean(checkoutRequest)));
+    buyDuo.textContent = checkoutRequest ? 'Opening checkout…' : 'Buy now';
+  }
+}
+
+function updateProductShipping() {
+  const note = document.querySelector('[data-pdp-shipping]');
+  if (!note) return;
+  const cents = getShippingCents(state.shipping, [{ slug: state.route.slug, quantity: state.pdpQty }]);
+  note.textContent = Number.isInteger(cents)
+    ? `Standard U.S. shipping ${formatMoney(cents / 100)} · Tax at checkout`
+    : 'Shipping and tax shown at checkout.';
 }
 
 function renderOverlays(animateIn = true) {
@@ -162,6 +178,7 @@ function renderOverlays(animateIn = true) {
       checkoutMessage: state.checkoutMessage,
       checkoutEnabled: state.checkoutEnabled,
       shipping: state.shipping,
+      offerMessage: state.offerMessage,
     }),
     renderSearchModal({ isOpen: state.isSearchOpen, query: state.searchQuery }),
   ]
@@ -199,6 +216,7 @@ function renderActiveViewHtml() {
       return renderProductView({
         slug: state.route.slug,
         qty: state.pdpQty,
+        offerCode: new URLSearchParams(window.location.search).get('promo')?.toUpperCase(),
       });
     case 'routine':
       return renderRoutineView();
@@ -239,6 +257,7 @@ function renderRoute() {
 
   disconnectCollectionObserver?.();
   mainEl.innerHTML = renderActiveViewHtml();
+  updateProductShipping();
   const explorer = mainEl.querySelector('[data-collection-explorer]');
   disconnectCollectionObserver = explorer ? bindCollectionControls(explorer) : null;
 
@@ -381,7 +400,7 @@ async function startCheckout(trigger) {
     if (checkoutRequest === request) {
       state.checkoutMessage = error.name === 'CheckoutError'
         ? error.message : 'We couldn’t open checkout. Please try again.';
-      if (trigger.id === 'quick-checkout') {
+      if (!state.isCartOpen) {
         lastTrigger = trigger;
         state.isMobileMenuOpen = false;
         state.isSearchOpen = false;
@@ -546,6 +565,24 @@ document.addEventListener('click', (event) => {
       const selectedQty = document.querySelector('[data-pdp-selected-qty]');
       selectedQty.textContent = `${nextQty} selected`;
       selectedQty.hidden = nextQty === 1;
+      updateProductShipping();
+      break;
+    }
+    case 'buy-duo': {
+      if (!state.checkoutEnabled || checkoutRequest) break;
+      const product = getProductBySlug('the-daily-duo');
+      const quantity = state.pdpQty;
+      const hadItems = state.cart.itemCount > 0;
+      commerce.addItem(product.slug, quantity);
+      trackTikTok('AddToCart', [{ product, quantity }], product.price * quantity);
+      if (hadItems) {
+        lastTrigger = actionEl;
+        state.isCartOpen = true;
+        renderOverlays();
+        focusElementSoon('#cart-drawer [data-action="prepare-checkout"]');
+      } else {
+        startCheckout(actionEl);
+      }
       break;
     }
     case 'add-to-cart': {
@@ -602,6 +639,22 @@ document.addEventListener('change', (event) => {
     const count = updateCatalogInPlace();
     announce(`${formatProductCount(count)} shown.`);
   }
+});
+
+document.addEventListener('submit', (event) => {
+  if (event.target.id !== 'cart-offer') return;
+  event.preventDefault();
+  if (checkoutRequest) return;
+  const code = new FormData(event.target).get('code');
+  const result = commerce.applyDuoOffer(code);
+  state.offerMessage = {
+    invalid: 'That code isn’t available.',
+    missing: 'Add the Daily Cleansing Foam and Daily Face Moisturizer to use this code.',
+    included: 'Your bag already includes the Daily Duo bundle price.',
+    applied: 'Daily Duo bundle pricing applied.',
+  }[result];
+  renderOverlays(false);
+  focusElementSoon('#cart-offer-result');
 });
 
 document.addEventListener('input', (event) => {
@@ -663,6 +716,7 @@ window.addEventListener('popstate', handleLocationChange);
 commerce.subscribe((nextCart) => {
   checkoutRequest = null;
   state.checkoutMessage = '';
+  state.offerMessage = '';
   state.cart = nextCart;
   updateHeaderCounts();
   if (state.isCartOpen) {
@@ -692,6 +746,7 @@ getCheckoutSettings().then(({ enabled, shipping }) => {
   if (enabled !== true) return;
   state.checkoutEnabled = true;
   if (shipping?.weightsGrams && Array.isArray(shipping.tiers)) state.shipping = shipping;
+  updateProductShipping();
   updateQuickCheckout();
   if (state.isCartOpen) {
     renderOverlays(false);
